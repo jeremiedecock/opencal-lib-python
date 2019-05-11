@@ -97,7 +97,7 @@ sed -i "" \
     docs/intro.rst \
     docs/make.bat \
     docs/Makefile \
-    TODO_PYTHON_PACKAGE_NAME/__init__.py
+    opencal/__init__.py
 
 
 # FIX TITLES UNDERLINE LENGTH IN RESTRUCTUREDTEXT FILES #######################
@@ -115,5 +115,5 @@ sed -i "" \
 
 # RENAME THE ROOT PACKAGE DIRECTORY ###########################################
 
-mv -v TODO_PYTHON_PACKAGE_NAME "${PYTHON_PACKAGE_NAME}"
+#mv -v TODO_PYTHON_PACKAGE_NAME "${PYTHON_PACKAGE_NAME}"
 

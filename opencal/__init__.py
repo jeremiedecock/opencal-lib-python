@@ -1,6 +1,6 @@
-"""TODO_PROJECT_NAME
+"""OpenCAL
 
-TODO_PROJECT_SHORT_DESC
+OpenCAL core library for Python
 
 Note:
 
@@ -8,11 +8,11 @@ Note:
 
 Viewing documentation using IPython
 -----------------------------------
-To see which functions are available in `TODO_PYTHON_PACKAGE_NAME`, type ``TODO_PYTHON_PACKAGE_NAME.<TAB>`` (where
-``<TAB>`` refers to the TAB key), or use ``TODO_PYTHON_PACKAGE_NAME.*get_version*?<ENTER>`` (where
+To see which functions are available in `opencal`, type ``opencal.<TAB>`` (where
+``<TAB>`` refers to the TAB key), or use ``opencal.*get_version*?<ENTER>`` (where
 ``<ENTER>`` refers to the ENTER key) to narrow down the list.  To view the
-docstring for a function, use ``TODO_PYTHON_PACKAGE_NAME.get_version?<ENTER>`` (to view the
-docstring) and ``TODO_PYTHON_PACKAGE_NAME.get_version??<ENTER>`` (to view the source code).
+docstring for a function, use ``opencal.get_version?<ENTER>`` (to view the
+docstring) and ``opencal.get_version??<ENTER>`` (to view the source code).
 """
 
 # PEP0440 compatible formatted version, see:

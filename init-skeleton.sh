@@ -82,6 +82,9 @@ sed -i "" \
     -e "s TODO_PROJECT_ONLINE_API_DOCUMENTATION_URL ${PROJECT_ONLINE_API_DOCUMENTATION_URL} g" \
     AUTHORS \
     CHANGES.rst \
+    .gitlab-ci.yml \
+    .travis.yml \
+    environment.yml \
     LICENSE \
     meta.make \
     README.rst \

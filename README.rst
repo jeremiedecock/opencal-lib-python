@@ -6,9 +6,12 @@ Copyright (c) 2008-2019 Jérémie DECOCK (www.jdhp.org)
 
 * Web site: http://www.jdhp.org/software_en.html#opencal
 * Online documentation: https://jdhp.gitlab.io/opencal
+* Examples: https://jdhp.gitlab.io/opencal/gallery/
+
+* Notebooks: https://gitlab.com/jdhp/opencal-lib-python-notebooks
 * Source code: https://gitlab.com/jdhp/opencal-lib-python
 * Issue tracker: https://gitlab.com/jdhp/opencal-lib-python/issues
-* opencal on PyPI: https://pypi.org/project/opencal
+* OpenCal on PyPI: https://pypi.org/project/opencal
 
 
 Description

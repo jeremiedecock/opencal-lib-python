@@ -44,12 +44,14 @@ except ImportError:
 
 # SETUP VARIABLES #############################################################
 
-from opencal import __version__ as VERSION
+from opencal import get_version
+
+VERSION = get_version()
 
 AUTHOR_NAME = 'Jérémie DECOCK'
 AUTHOR_EMAIL = 'jd.jdhp@gmail.com'
 
-PYTHON_PACKAGE_NAME = 'opencal'
+PYPI_PACKAGE_NAME = 'opencal'
 PROJECT_SHORT_DESC = 'OpenCAL core library for Python'
 PROJECT_WEB_SITE_URL = 'http://www.jdhp.org/software_en.html#opencal'
 
@@ -111,7 +113,7 @@ setup(author=AUTHOR_NAME,
       maintainer=AUTHOR_NAME,
       maintainer_email=AUTHOR_EMAIL,
 
-      name=PYTHON_PACKAGE_NAME,
+      name=PYPI_PACKAGE_NAME,
       description=PROJECT_SHORT_DESC,
       long_description=get_long_description(),
       url=PROJECT_WEB_SITE_URL,
@@ -126,7 +128,7 @@ setup(author=AUTHOR_NAME,
 
       install_requires=INSTALL_REQUIRES,
       #platforms=['Linux'],
-      #requires=['pyserial'],
+      #requires=[],
 
       scripts=SCRIPTS,
       entry_points=ENTRY_POINTS,

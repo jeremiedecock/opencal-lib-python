@@ -6,7 +6,7 @@ OpenCAL core library for Python
 
 Note:
 
-    This project is still in beta stage, so the API is not finalized yet.
+    This project is in beta stage, the API may change.
 
 Contents:
 

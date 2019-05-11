@@ -53,12 +53,12 @@ echo "PROJECT_ONLINE_API_DOCUMENTATION_URL: ${PROJECT_ONLINE_API_DOCUMENTATION_U
 
 # SETUP GIT ###################################################################
 
-git remote rename origin skeleton
-git remote add origin git@github.com:${PROJECT_GITHUB_ACCOUNT}/${PROJECT_GITHUB_REPOSITORY_NAME}.git
-git push -u origin master
+#git remote rename origin skeleton
+#git remote add origin git@github.com:${PROJECT_GITHUB_ACCOUNT}/${PROJECT_GITHUB_REPOSITORY_NAME}.git
+#git push -u origin master
 
-git submodule init
-git submodule update
+#git submodule init
+#git submodule update
 
 
 # MAKE SUBSTITUTIONS ##########################################################

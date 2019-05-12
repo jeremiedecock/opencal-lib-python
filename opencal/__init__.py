@@ -31,9 +31,9 @@ docstring) and ``opencal.get_version??<ENTER>`` (to view the source code).
 # Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
-__version__ = '0.1.dev0'
+__version__ = '0.1.dev1'
 
 def get_version():
     return __version__
 
-__all__ = ['TODO']
+__all__ = []

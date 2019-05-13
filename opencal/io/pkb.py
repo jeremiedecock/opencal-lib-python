@@ -4,6 +4,34 @@ from xml.sax.handler import ContentHandler, ErrorHandler
 
 import warnings
 
+
+def save_pkb(card_list, pkb_path):
+
+    pkb_path = os.path.expanduser(pkb_path)  # to handle "~/..." paths
+    pkb_path = os.path.abspath(pkb_path)     # to handle relative paths
+
+    with open(pkb_path, 'w') as fd:
+        print('<?xml version="1.0" encoding="UTF-8" standalone="no"?>', file=fd)
+        print('<pkb>', file=fd)
+        for card in card_list:
+            cdate_str = card['cdate']                                # TODO
+            hidden_str = 'true' if card['hidden'] else 'false'
+
+            print('<card cdate="{}" hidden="{}">'.format(cdate_str, hidden_str), file=fd)
+
+            print('<question><![CDATA[{}]]></question>'.format(card['question']), file=fd)   # TODO: escape CDATA
+            print('<answer><![CDATA[{}]]></answer>'.format(card['answer']), file=fd)         # TODO: escape CDATA
+
+            for tag in card['tags']:
+                print('<tag>{}</tag>'.format(tag), file=fd)
+            
+            for review in card['reviews']:
+                print('<review rdate="{}" result="{}"/>'.format(review['rdate'], review['result']), file=fd)               # TODO
+
+            print('</card>', file=fd)
+        print('</pkb>', file=fd)
+
+
 def load_pkb(pkb_path):
 
     pkb_path = os.path.expanduser(pkb_path)  # to handle "~/..." paths
@@ -19,7 +47,7 @@ def load_pkb(pkb_path):
     inputsource = xml.sax.InputSource(pkb_path)
     xml_reader.parse(inputsource)
 
-    return pkb_handler.data
+    return pkb_handler.card_list
 
 
 class PKBHandler(ContentHandler, ErrorHandler):
@@ -35,7 +63,7 @@ class PKBHandler(ContentHandler, ErrorHandler):
         self._current_tag = None
 
     @property
-    def data(self):
+    def card_list(self):
         return self._card_list
 
     # ContentHandler ############################
@@ -57,7 +85,7 @@ class PKBHandler(ContentHandler, ErrorHandler):
             self._current_card = {"reviews": [], "tags": []}
 
             for key, value in list(attr.items()):
-                if key in ("cdate", "hidden"):
+                if key in ("cdate", "hidden"):       # TODO: parse dates
                     if key == "hidden":
                         if value == "true":
                             value = True
@@ -80,7 +108,7 @@ class PKBHandler(ContentHandler, ErrorHandler):
             self._current_review = {}
 
             for key, value in list(attr.items()):
-                if key in ("rdate", "result"):
+                if key in ("rdate", "result"):            # TODO: parse dates
                     self._current_review[key] = value
                 else:
                     raise ValueError(key)

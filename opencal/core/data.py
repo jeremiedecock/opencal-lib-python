@@ -1,4 +1,5 @@
 import pandas as pd
+import copy
 
 def card_list_to_dataframes(card_list):
     flat_card_list = []
@@ -7,6 +8,8 @@ def card_list_to_dataframes(card_list):
     card_id = 0
 
     for card in card_list:
+        card = copy.deepcopy(card)
+
         del card["question"]
         del card["answer"]
         del card["tags"]
@@ -25,7 +28,7 @@ def card_list_to_dataframes(card_list):
 
         card_id += 1
 
-    card_df = pd.DataFrame(flat_card_list)        # TODO: parse dates
-    review_df = pd.DataFrame(flat_review_list)    # TODO: parse dates
+    card_df = pd.DataFrame(flat_card_list)
+    review_df = pd.DataFrame(flat_review_list)
 
     return card_df, review_df

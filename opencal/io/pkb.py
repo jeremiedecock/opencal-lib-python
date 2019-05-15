@@ -1,8 +1,10 @@
+import datetime
 import os
+import warnings
 import xml.sax
 from xml.sax.handler import ContentHandler, ErrorHandler
 
-import warnings
+PY_DATE_FORMAT = "%Y-%m-%d"
 
 
 def save_pkb(card_list, pkb_path):
@@ -14,7 +16,7 @@ def save_pkb(card_list, pkb_path):
         print('<?xml version="1.0" encoding="UTF-8" standalone="no"?>', file=fd)
         print('<pkb>', file=fd)
         for card in card_list:
-            cdate_str = card['cdate']                                # TODO
+            cdate_str = card['cdate'].strftime(PY_DATE_FORMAT)
             hidden_str = 'true' if card['hidden'] else 'false'
 
             print('<card cdate="{}" hidden="{}">'.format(cdate_str, hidden_str), file=fd)
@@ -26,7 +28,8 @@ def save_pkb(card_list, pkb_path):
                 print('<tag>{}</tag>'.format(tag), file=fd)
             
             for review in card['reviews']:
-                print('<review rdate="{}" result="{}"/>'.format(review['rdate'], review['result']), file=fd)               # TODO
+                rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
+                print('<review rdate="{}" result="{}"/>'.format(rdate_str, review['result']), file=fd)
 
             print('</card>', file=fd)
         print('</pkb>', file=fd)
@@ -85,16 +88,15 @@ class PKBHandler(ContentHandler, ErrorHandler):
             self._current_card = {"reviews": [], "tags": []}
 
             for key, value in list(attr.items()):
-                if key in ("cdate", "hidden"):       # TODO: parse dates
-                    if key == "hidden":
-                        if value == "true":
-                            value = True
-                        elif value == "false":
-                            value = False
-                        else:
-                            raise Exception('Unexpected value for the "hidden" attribute: got {} (expected "true" or "false")'.format(value))
-
-                    self._current_card[key] = value
+                if key == "cdate":
+                    self._current_card[key] = datetime.datetime.strptime(value, PY_DATE_FORMAT) #.date()
+                elif key == "hidden":
+                    if value == "true":
+                        self._current_card[key] = True
+                    elif value == "false":
+                        self._current_card[key] = False
+                    else:
+                        raise Exception('Unexpected value for the "hidden" attribute: got {} (expected "true" or "false")'.format(value))
                 else:
                     raise ValueError(key)
         elif name == "question":
@@ -108,7 +110,9 @@ class PKBHandler(ContentHandler, ErrorHandler):
             self._current_review = {}
 
             for key, value in list(attr.items()):
-                if key in ("rdate", "result"):            # TODO: parse dates
+                if key == "rdate":
+                    self._current_review[key] = datetime.datetime.strptime(value, PY_DATE_FORMAT) #.date()
+                elif key == "result":
                     self._current_review[key] = value
                 else:
                     raise ValueError(key)

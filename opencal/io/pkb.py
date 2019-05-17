@@ -22,7 +22,10 @@ def save_pkb(card_list, pkb_path):
             print('<card cdate="{}" hidden="{}">'.format(cdate_str, hidden_str), file=fd)
 
             print('<question><![CDATA[{}]]></question>'.format(card['question']), file=fd)   # TODO: escape CDATA
-            print('<answer><![CDATA[{}]]></answer>'.format(card['answer']), file=fd)         # TODO: escape CDATA
+            if card['answer'] == '':
+                print('<answer/>', file=fd)
+            else:
+                print('<answer><![CDATA[{}]]></answer>'.format(card['answer']), file=fd)     # TODO: escape CDATA
 
             for tag in card['tags']:
                 print('<tag>{}</tag>'.format(tag), file=fd)

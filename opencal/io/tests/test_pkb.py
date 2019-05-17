@@ -110,13 +110,23 @@ PKB_4_XML_TAGS_EMBEDDED_STR = """<?xml version="1.0" encoding="UTF-8" standalone
 </pkb>
 """
 
+PKB_5_EMPTY_ANSWER_STR = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pkb>
+<card cdate="2008-04-02" hidden="false">
+<question><![CDATA[Question.]]></question>
+<answer/>
+<tag>tag 1</tag>
+</card>
+</pkb>
+"""
+
 def load_and_save_and_compare(pkb_str):
     """Check whether successives load and save keep the original file identical."""
 
     # Create a temporary file and parse it ######
 
     with tempfile.NamedTemporaryFile(mode='w') as tf:
-        tf.write(PKB_1_BASIC_STR)
+        tf.write(pkb_str)
         tf.file.flush()
 
         pkb_path = tf.name
@@ -138,7 +148,7 @@ def load_and_save_and_compare(pkb_str):
 
     # Test ######################################
 
-    assert saved_str == PKB_1_BASIC_STR
+    assert saved_str == pkb_str
 
 
 def test_load_pkb_and_save_pkb_basic():
@@ -156,3 +166,7 @@ def test_load_pkb_and_save_pkb_utf8():
 def test_load_pkb_and_save_pkb_xml_embedded():
     """Check whether successives load and save keep the original file identical."""
     load_and_save_and_compare(PKB_4_XML_TAGS_EMBEDDED_STR)
+
+def test_load_pkb_and_save_pkb_empty_answer():
+    """Check whether successives load and save keep the original file identical."""
+    load_and_save_and_compare(PKB_5_EMPTY_ANSWER_STR)

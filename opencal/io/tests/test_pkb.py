@@ -127,6 +127,26 @@ PKB_6_EMPTY_CARD_LIST_STR = """<?xml version="1.0" encoding="UTF-8" standalone="
 </pkb>
 """
 
+PKB_7_CDATA_NESTING_STR = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pkb>
+<card cdate="2008-04-02" hidden="false">
+<question><![CDATA[foo]]]]><![CDATA[>bar]]]]><![CDATA[>baz]]></question>
+<answer/>
+<tag>tag 1</tag>
+</card>
+</pkb>
+"""
+
+PKB_8_SOME_SPECIAL_CHARS_STR = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pkb>
+<card cdate="2008-04-02" hidden="false">
+<question><![CDATA[{} \" \\\" > # // % $ &]]></question>
+<answer/>
+<tag>tag 1</tag>
+</card>
+</pkb>
+"""
+
 def load_save_and_compare(pkb_str):
     """Check whether successives load and save keep the original file identical."""
 
@@ -182,6 +202,13 @@ def test_load_pkb_and_save_pkb_empty_card_list():
     """Check whether successives load and save keep the original file identical."""
     load_save_and_compare(PKB_6_EMPTY_CARD_LIST_STR)
 
+def test_load_pkb_and_save_pkb_cdata_nesting():
+    """Check whether successives load and save keep the original file identical."""
+    load_save_and_compare(PKB_7_CDATA_NESTING_STR)
+
+def test_load_pkb_and_save_pkb_special_chars():
+    """Check whether successives load and save keep the original file identical."""
+    load_save_and_compare(PKB_8_SOME_SPECIAL_CHARS_STR)
 
 
 def test_load_pkb_err_empty_cdate():

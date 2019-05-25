@@ -6,6 +6,13 @@ from xml.sax.handler import ContentHandler, ErrorHandler
 
 PY_DATE_FORMAT = "%Y-%m-%d"
 
+# EXCEPTION CLASSES ###########################################################
+
+class XmlPkbError(Exception):
+    """Exception raised if the XML PKB file is not valid."""
+    pass
+
+# SAVE PKB ####################################################################
 
 def save_pkb(card_list, pkb_path):
 
@@ -21,11 +28,20 @@ def save_pkb(card_list, pkb_path):
 
             print('<card cdate="{}" hidden="{}">'.format(cdate_str, hidden_str), file=fd)
 
-            print('<question><![CDATA[{}]]></question>'.format(card['question']), file=fd)   # TODO: escape CDATA
+            # In the following code, the "]]>" is replaced by "]]]]><![CDATA[>"
+            # to avoid premature end of the CDATA section by XML parser ("CDATA nesting").
+            # See the following links for more details:
+            # - https://en.wikipedia.org/wiki/CDATA#Nesting
+            # - https://en.wikipedia.org/wiki/CDATA#Issues_with_encoding
+            # - https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
+
+            question_str = card['question'].replace("]]>", "]]]]><![CDATA[>")
+            print('<question><![CDATA[{}]]></question>'.format(question_str), file=fd)
             if card['answer'] == '':
                 print('<answer/>', file=fd)
             else:
-                print('<answer><![CDATA[{}]]></answer>'.format(card['answer']), file=fd)     # TODO: escape CDATA
+                answer_str = card['answer'].replace("]]>", "]]]]><![CDATA[>")
+                print('<answer><![CDATA[{}]]></answer>'.format(answer_str), file=fd)
 
             for tag in card['tags']:
                 print('<tag>{}</tag>'.format(tag), file=fd)
@@ -37,6 +53,7 @@ def save_pkb(card_list, pkb_path):
             print('</card>', file=fd)
         print('</pkb>', file=fd)
 
+# LOAD PKB ####################################################################
 
 def load_pkb(pkb_path):
 

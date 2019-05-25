@@ -7,8 +7,10 @@ This module contains unit tests for the "opencal.io.pkb" module.
 
 import opencal.io.pkb
 
+import datetime
 import numpy as np
 import os
+import pytest
 import tempfile
 
 # Test the "load_pkb" and "save_pkb" functions ################################
@@ -120,7 +122,12 @@ PKB_5_EMPTY_ANSWER_STR = """<?xml version="1.0" encoding="UTF-8" standalone="no"
 </pkb>
 """
 
-def load_and_save_and_compare(pkb_str):
+PKB_6_EMPTY_CARD_LIST_STR = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pkb>
+</pkb>
+"""
+
+def load_save_and_compare(pkb_str):
     """Check whether successives load and save keep the original file identical."""
 
     # Create a temporary file and parse it ######
@@ -153,20 +160,105 @@ def load_and_save_and_compare(pkb_str):
 
 def test_load_pkb_and_save_pkb_basic():
     """Check whether successives load and save keep the original file identical."""
-    load_and_save_and_compare(PKB_1_BASIC_STR)
+    load_save_and_compare(PKB_1_BASIC_STR)
 
 def test_load_pkb_and_save_pkb_multilines():
     """Check whether successives load and save keep the original file identical."""
-    load_and_save_and_compare(PKB_2_MULTILINES_STR)
+    load_save_and_compare(PKB_2_MULTILINES_STR)
 
 def test_load_pkb_and_save_pkb_utf8():
     """Check whether successives load and save keep the original file identical."""
-    load_and_save_and_compare(PKB_3_UTF8_STR)
+    load_save_and_compare(PKB_3_UTF8_STR)
 
 def test_load_pkb_and_save_pkb_xml_embedded():
     """Check whether successives load and save keep the original file identical."""
-    load_and_save_and_compare(PKB_4_XML_TAGS_EMBEDDED_STR)
+    load_save_and_compare(PKB_4_XML_TAGS_EMBEDDED_STR)
 
 def test_load_pkb_and_save_pkb_empty_answer():
     """Check whether successives load and save keep the original file identical."""
-    load_and_save_and_compare(PKB_5_EMPTY_ANSWER_STR)
+    load_save_and_compare(PKB_5_EMPTY_ANSWER_STR)
+
+def test_load_pkb_and_save_pkb_empty_card_list():
+    """Check whether successives load and save keep the original file identical."""
+    load_save_and_compare(PKB_6_EMPTY_CARD_LIST_STR)
+
+
+
+def test_load_pkb_err_empty_cdate():
+    pkb_str = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <pkb>
+    <card cdate="" hidden="false">
+    <question><![CDATA[Question.]]></question>
+    <answer/>
+    <tag>tag 1</tag>
+    </card>
+    </pkb>
+    """
+
+    with tempfile.NamedTemporaryFile(mode='w') as tf:
+        tf.write(pkb_str)
+        tf.file.flush()
+
+        pkb_path = tf.name
+
+        #with pytest.raises(opencal.io.pkb.XmlPkbError):   # TODO ?
+        with pytest.raises(ValueError):
+            card_list = opencal.io.pkb.load_pkb(pkb_path)
+
+
+def test_save_pkb_cdata_nesting():
+    card_list = [{'reviews': [],
+                  'tags': ['tag 1'],
+                  'cdate': datetime.datetime(2018, 1, 1, 0, 0),
+                  'hidden': False,
+                  'question': 'This is ]]></question><answer/><tag>Hack</tag></card><card cdate="2018-01-02" hidden="false"><question><![CDATA[an XML code injection example',
+                  'answer': ''}]
+
+    with tempfile.NamedTemporaryFile(mode='w') as tf:
+        pkb_path = tf.name
+
+    # Here the temp file is closed and removed
+
+    # Save ######################################
+
+    opencal.io.pkb.save_pkb(card_list, pkb_path)
+
+    # Read saved file ###########################
+
+    saved_card_list = opencal.io.pkb.load_pkb(pkb_path)
+
+    os.remove(pkb_path)
+
+    # Test ######################################
+
+    assert len(card_list) == len(saved_card_list)     # If the XML code injection succedded then we have two cards instead of one
+    assert card_list[0]['question'] == saved_card_list[0]['question']  # Question is modified if the XML code injection succedded
+
+
+def test_save_pkb_cdata_nesting_2():
+    card_list = [{'reviews': [],
+                  'tags': ['tag 1'],
+                  'cdate': datetime.datetime(2018, 1, 1, 0, 0),
+                  'hidden': False,
+                  'question': 'foo]]>bar]]>baz',
+                  'answer': ''}]
+
+    with tempfile.NamedTemporaryFile(mode='w') as tf:
+        pkb_path = tf.name
+
+    # Here the temp file is closed and removed
+
+    # Save ######################################
+
+    opencal.io.pkb.save_pkb(card_list, pkb_path)
+
+    # Read saved file ###########################
+
+    saved_card_list = opencal.io.pkb.load_pkb(pkb_path)
+
+    os.remove(pkb_path)
+
+    # Test ######################################
+
+    assert len(card_list) == len(saved_card_list)     # If the XML code injection succedded then we have two cards instead of one
+    assert card_list[0]['question'] == saved_card_list[0]['question']  # Question is modified if the XML code injection succedded

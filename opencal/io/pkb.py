@@ -20,13 +20,13 @@ def save_pkb(card_list, pkb_path):
     pkb_path = os.path.abspath(pkb_path)     # to handle relative paths
 
     with open(pkb_path, 'w') as fd:
-        print('<?xml version="1.0" encoding="UTF-8" standalone="no"?>', file=fd)
-        print('<pkb>', file=fd)
+        fd.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
+        fd.write('<pkb>\n')
         for card in card_list:
             cdate_str = card['cdate'].strftime(PY_DATE_FORMAT)
             hidden_str = 'true' if card['hidden'] else 'false'
 
-            print('<card cdate="{}" hidden="{}">'.format(cdate_str, hidden_str), file=fd)
+            fd.write('<card cdate="{}" hidden="{}">\n'.format(cdate_str, hidden_str))
 
             # In the following code, the "]]>" is replaced by "]]]]><![CDATA[>"
             # to avoid premature end of the CDATA section by XML parser ("CDATA nesting").
@@ -36,22 +36,22 @@ def save_pkb(card_list, pkb_path):
             # - https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
 
             question_str = card['question'].replace("]]>", "]]]]><![CDATA[>")
-            print('<question><![CDATA[{}]]></question>'.format(question_str), file=fd)
+            fd.write('<question><![CDATA[{}]]></question>\n'.format(question_str))
             if card['answer'] == '':
-                print('<answer/>', file=fd)
+                fd.write('<answer/>\n')
             else:
                 answer_str = card['answer'].replace("]]>", "]]]]><![CDATA[>")
-                print('<answer><![CDATA[{}]]></answer>'.format(answer_str), file=fd)
+                fd.write('<answer><![CDATA[{}]]></answer>\n'.format(answer_str))
 
             for tag in card['tags']:
-                print('<tag>{}</tag>'.format(tag), file=fd)
+                fd.write('<tag>{}</tag>\n'.format(tag))
             
             for review in card['reviews']:
                 rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
-                print('<review rdate="{}" result="{}"/>'.format(rdate_str, review['result']), file=fd)
+                fd.write('<review rdate="{}" result="{}"/>\n'.format(rdate_str, review['result']))
 
-            print('</card>', file=fd)
-        print('</pkb>', file=fd)
+            fd.write('</card>\n')
+        fd.write('</pkb>\n')
 
 # LOAD PKB ####################################################################
 

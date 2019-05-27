@@ -63,6 +63,52 @@ CARD_REVIEWS_NOT_SORTED = {
         ]
     }
 
+CARD_IGNORE_PREMATURE_RIGHT_REVIEWS = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8), # <- Too early and as it's a "right" answer, it should be ignored.
+                "result": "good"
+            }
+        ]
+    }
+
+CARD_IGNORE_PREMATURE_BAD_REVIEWS = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8), # <- Too early, but as it's a "bad" answer, it should *not* be ignored.
+                "result": "bad"
+            }
+        ]
+    }
+
+CARD_IGNORE_FUTURE_REVIEWS = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=7),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE + datetime.timedelta(days=1),
+                "result": "bad"
+            }
+        ]
+    }
+
 def test_card_without_review():
     assert prof.assess(CARD_WITHOUT_REVIEW, BOGUS_CURRENT_DATE) == prof.HAS_NEVER_BEEN_REVIEWED
 
@@ -76,3 +122,12 @@ def test_reviews_not_sorted():
     #assert prof.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
     with pytest.raises(AssertionError):
         prof.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE)
+
+def test_ignore_premature_right_reviews():
+    assert prof.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, BOGUS_CURRENT_DATE) == 1
+
+def test_ignore_premature_bad_reviews():
+    assert prof.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, BOGUS_CURRENT_DATE) == 0
+
+def test_ignore_future_reviews():
+    assert prof.assess(CARD_IGNORE_FUTURE_REVIEWS, BOGUS_CURRENT_DATE) == 2

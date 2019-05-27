@@ -28,20 +28,21 @@ def assess(card, today=None):
         assert all(review_list[i]["rdate"] <= review_list[i+1]["rdate"] for i in range(len(review_list)-1))
         #review_list.sort(key=lambda x: x["rdate"])
 
+        if today is None:
+            today = datetime.datetime.now().date()
+        
         for review in review_list:
             rdate = review["rdate"]
             result = review["result"]
 
-            if result == RIGHT_ANSWER_STR:
-                if rdate >= expected_revision_date:   # "rdate before expected_revision_date"
-                    grade += 1
+            if rdate <= today:                            # Ignore future reviews
+                if result == RIGHT_ANSWER_STR:
+                    if rdate >= expected_revision_date:   # "rdate before expected_revision_date"
+                        grade += 1
+                        expected_revision_date = get_expected_revision_date(rdate, grade)
+                else:
+                    grade = 0
                     expected_revision_date = get_expected_revision_date(rdate, grade)
-            else:
-                grade = 0
-                expected_revision_date = get_expected_revision_date(rdate, grade)
-        
-        if today is None:
-            today = datetime.datetime.now().date()
         
         if expected_revision_date > today:            # "today before expected_revision_date"
             # It's too early to review this card. The card will be hide

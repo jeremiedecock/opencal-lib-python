@@ -73,4 +73,6 @@ def test_basic_card():
     assert prof.assess(CARD_BASIC, BOGUS_CURRENT_DATE) == 2
 
 def test_reviews_not_sorted():
-    assert prof.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
+    #assert prof.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
+    with pytest.raises(AssertionError):
+        prof.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE)

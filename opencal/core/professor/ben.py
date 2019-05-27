@@ -24,8 +24,9 @@ def assess(card, today=None):
         cdate = card["cdate"]
         expected_revision_date = get_expected_revision_date(cdate, grade)
 
-        # Sort reviews ("in-place")
-        review_list.sort(key=lambda x: x["rdate"])
+        # Reviews are supposed to be sorted!
+        assert all(review_list[i]["rdate"] <= review_list[i+1]["rdate"] for i in range(len(review_list)-1))
+        #review_list.sort(key=lambda x: x["rdate"])
 
         for review in review_list:
             rdate = review["rdate"]

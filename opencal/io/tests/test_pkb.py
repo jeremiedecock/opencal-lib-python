@@ -147,7 +147,35 @@ PKB_8_SOME_SPECIAL_CHARS_STR = """<?xml version="1.0" encoding="UTF-8" standalon
 </pkb>
 """
 
-def load_save_and_compare(pkb_str):
+PKB_9_REVIEWS_NOT_SORTED_PROVIDED_INPUT = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pkb>
+<card cdate="2008-04-02" hidden="false">
+<question><![CDATA[Foo]]></question>
+<answer/>
+<tag>tag 1</tag>
+<review rdate="2008-01-10" result="bad"/>
+<review rdate="2008-01-15" result="good"/>
+<review rdate="2008-01-11" result="bad"/>
+<review rdate="2008-01-07" result="good"/>
+</card>
+</pkb>
+"""
+
+PKB_9_REVIEWS_NOT_SORTED_EXPECTED_OUTPUT = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pkb>
+<card cdate="2008-04-02" hidden="false">
+<question><![CDATA[Foo]]></question>
+<answer/>
+<tag>tag 1</tag>
+<review rdate="2008-01-07" result="good"/>
+<review rdate="2008-01-10" result="bad"/>
+<review rdate="2008-01-11" result="bad"/>
+<review rdate="2008-01-15" result="good"/>
+</card>
+</pkb>
+"""
+
+def load_save_and_compare(pkb_str, expected_output=None):
     """Check whether successives load and save keep the original file identical."""
 
     # Create a temporary file and parse it ######
@@ -175,7 +203,10 @@ def load_save_and_compare(pkb_str):
 
     # Test ######################################
 
-    assert saved_str == pkb_str
+    if expected_output is not None:
+        assert saved_str == expected_output
+    else:
+        assert saved_str == pkb_str
 
 
 def test_load_pkb_and_save_pkb_basic():
@@ -209,6 +240,10 @@ def test_load_pkb_and_save_pkb_cdata_nesting():
 def test_load_pkb_and_save_pkb_special_chars():
     """Check whether successives load and save keep the original file identical."""
     load_save_and_compare(PKB_8_SOME_SPECIAL_CHARS_STR)
+
+def test_load_pkb_and_save_pkb_reviews_not_sorted():
+    """Check whether successives load and save keep the original file identical."""
+    load_save_and_compare(PKB_9_REVIEWS_NOT_SORTED_PROVIDED_INPUT, PKB_9_REVIEWS_NOT_SORTED_EXPECTED_OUTPUT)
 
 
 def test_load_pkb_err_empty_cdate():

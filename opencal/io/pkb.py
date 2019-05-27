@@ -145,6 +145,10 @@ class PKBHandler(ContentHandler, ErrorHandler):
 
         if name == "card":
             assert self._current_card is not None
+
+            # Sort reviews ("in-place")
+            self._current_card["reviews"].sort(key=lambda x: x["rdate"])
+
             self._card_list.append(self._current_card)
             self._current_card = None
         elif name == "question":

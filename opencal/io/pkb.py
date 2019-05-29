@@ -6,6 +6,8 @@ from xml.sax.handler import ContentHandler, ErrorHandler
 
 PY_DATE_FORMAT = "%Y-%m-%d"
 
+TIME_DELTA_OF_FIRST_REVIEWS = datetime.timedelta()   # Null time delta (0 day)
+
 # EXCEPTION CLASSES ###########################################################
 
 class XmlPkbError(Exception):
@@ -148,6 +150,14 @@ class PKBHandler(ContentHandler, ErrorHandler):
 
             # Sort reviews ("in-place")
             self._current_card["reviews"].sort(key=lambda x: x["rdate"])
+
+            # Add the "timedelta" attribute to each "review"
+            if ("reviews" in self._current_card) and len(self._current_card["reviews"]) > 0:
+                self._current_card["reviews"][0]["timedelta"] = TIME_DELTA_OF_FIRST_REVIEWS
+                for i in range(1, len(self._current_card["reviews"])):
+                    dt1 = self._current_card["reviews"][i-1]["rdate"]
+                    dt2 = self._current_card["reviews"][i]["rdate"]
+                    self._current_card["reviews"][i]["timedelta"] = dt2 - dt1
 
             self._card_list.append(self._current_card)
             self._current_card = None

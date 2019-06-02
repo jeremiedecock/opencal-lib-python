@@ -324,3 +324,43 @@ def test_save_pkb_cdata_nesting_2():
 
     assert len(card_list) == len(saved_card_list)     # If the XML code injection succedded then we have two cards instead of one
     assert card_list[0]['question'] == saved_card_list[0]['question']  # Question is modified if the XML code injection succedded
+
+
+def test_load_pkb_review_timedelta():
+    pkb_str = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <pkb>
+    <card cdate="2008-04-02" hidden="false">
+    <question><![CDATA[Foo]]></question>
+    <answer/>
+    <tag>tag 1</tag>
+    <review rdate="2008-01-07" result="good"/>
+    <review rdate="2008-01-10" result="bad"/>
+    <review rdate="2008-01-11" result="good"/>
+    <review rdate="2008-01-15" result="good"/>
+    </card>
+    </pkb>
+    """
+
+    expected_timedelta_list = [
+        opencal.io.pkb.TIME_DELTA_OF_FIRST_REVIEWS,
+        datetime.timedelta(days=3),
+        datetime.timedelta(days=1),
+        datetime.timedelta(days=4)
+    ]
+
+    with tempfile.NamedTemporaryFile(mode='w') as tf:
+        tf.write(pkb_str)
+        tf.file.flush()
+
+        pkb_path = tf.name
+
+        card_list = opencal.io.pkb.load_pkb(pkb_path)
+
+    # Here the temp file is closed and removed
+
+    # Test ######################################
+
+    review_list = card_list[0]["reviews"]
+
+    for review, expected_timedelta in zip(review_list, expected_timedelta_list):
+        assert review['timedelta'] == expected_timedelta

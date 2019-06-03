@@ -4,9 +4,12 @@ import warnings
 import xml.sax
 from xml.sax.handler import ContentHandler, ErrorHandler
 
+from opencal.core.data import RIGHT_ANSWER_STR
+
 PY_DATE_FORMAT = "%Y-%m-%d"
 
-TIME_DELTA_OF_FIRST_REVIEWS = datetime.timedelta()   # Null time delta (0 day)
+TIME_DELTA_OF_FIRST_REVIEWS = datetime.timedelta()    # Null time delta (0 day)
+INIT_VALIDATED_TIME_DELTA = datetime.timedelta()      # Null time delta (0 day)
 
 # EXCEPTION CLASSES ###########################################################
 
@@ -151,10 +154,16 @@ class PKBHandler(ContentHandler, ErrorHandler):
             # Sort reviews ("in-place")
             self._current_card["reviews"].sort(key=lambda x: x["rdate"])
 
-            # Add the "timedelta" attribute to each "review"
+            # Add the "timedelta" and "last_validated_timedelta" attributes to each "review"
             if ("reviews" in self._current_card) and len(self._current_card["reviews"]) > 0:
                 self._current_card["reviews"][0]["timedelta"] = TIME_DELTA_OF_FIRST_REVIEWS
+                self._current_card["reviews"][0]["last_validated_timedelta"] = INIT_VALIDATED_TIME_DELTA
+
                 for i in range(1, len(self._current_card["reviews"])):
+                    previous_timedelta = self._current_card["reviews"][i-1]["timedelta"]
+                    previous_result = self._current_card["reviews"][i-1]["result"]
+                    self._current_card["reviews"][i]["last_validated_timedelta"] = previous_timedelta if previous_result == RIGHT_ANSWER_STR else INIT_VALIDATED_TIME_DELTA
+
                     dt1 = self._current_card["reviews"][i-1]["rdate"]
                     dt2 = self._current_card["reviews"][i]["rdate"]
                     self._current_card["reviews"][i]["timedelta"] = dt2 - dt1

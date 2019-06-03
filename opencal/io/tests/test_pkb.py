@@ -364,3 +364,65 @@ def test_load_pkb_review_timedelta():
 
     for review, expected_timedelta in zip(review_list, expected_timedelta_list):
         assert review['timedelta'] == expected_timedelta
+
+
+def test_load_pkb_review_last_validated_timedelta():
+    pkb_str = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <pkb>
+    <card cdate="2008-04-02" hidden="false">
+    <question><![CDATA[Foo]]></question>
+    <answer/>
+    <tag>tag 1</tag>
+    <review rdate="2008-01-07" result="good"/>
+    <review rdate="2008-01-08" result="good"/>
+    <review rdate="2008-01-10" result="bad"/>
+    <review rdate="2008-01-11" result="good"/>
+    <review rdate="2008-01-15" result="good"/>
+    <review rdate="2008-01-20" result="good"/>
+    <review rdate="2008-01-22" result="good"/>
+    <review rdate="2008-01-30" result="good"/>
+    </card>
+    </pkb>
+    """
+
+    expected_timedelta_list = [
+        opencal.io.pkb.TIME_DELTA_OF_FIRST_REVIEWS,
+        datetime.timedelta(days=1),
+        datetime.timedelta(days=2),
+        datetime.timedelta(days=1),
+        datetime.timedelta(days=4),
+        datetime.timedelta(days=5),
+        datetime.timedelta(days=2),    # <<< FORWARD REVIEW
+        datetime.timedelta(days=8)
+    ]
+
+    expected_last_validated_timedelta_list = [
+        opencal.io.pkb.INIT_VALIDATED_TIME_DELTA,
+        datetime.timedelta(days=0),
+        datetime.timedelta(days=1),
+        datetime.timedelta(days=0),
+        datetime.timedelta(days=1),
+        datetime.timedelta(days=4),
+        datetime.timedelta(days=5),
+        datetime.timedelta(days=2)     # <<< TODO: ACKWARD... HOW TO HANDLE FORWARD REVIEWS ?
+    ]
+
+    with tempfile.NamedTemporaryFile(mode='w') as tf:
+        tf.write(pkb_str)
+        tf.file.flush()
+
+        pkb_path = tf.name
+
+        card_list = opencal.io.pkb.load_pkb(pkb_path)
+
+    # Here the temp file is closed and removed
+
+    # Test ######################################
+
+    review_list = card_list[0]["reviews"]
+
+    for review, expected_timedelta, expected_last_validated_timedelta in zip(review_list,
+                                                                             expected_timedelta_list,
+                                                                             expected_last_validated_timedelta_list):
+        assert review['timedelta'] == expected_timedelta
+        assert review['last_validated_timedelta'] == expected_last_validated_timedelta

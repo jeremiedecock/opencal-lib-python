@@ -1,6 +1,9 @@
 import pandas as pd
 import copy
 
+RIGHT_ANSWER_STR = "good"
+WRONG_ANSWER_STR = "wrong"
+
 def card_list_to_dataframes(card_list):
     flat_card_list = []
     flat_review_list = []

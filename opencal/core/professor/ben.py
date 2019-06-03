@@ -7,8 +7,7 @@ import copy
 import datetime
 import math
 
-RIGHT_ANSWER_STR = "good"
-WRONG_ANSWER_STR = "wrong"
+from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 DONT_REVIEW_THIS_TODAY = -1
 HAS_NEVER_BEEN_REVIEWED = 0

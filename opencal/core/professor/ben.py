@@ -12,6 +12,20 @@ from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 DONT_REVIEW_THIS_TODAY = -1
 HAS_NEVER_BEEN_REVIEWED = 0
 
+class ProfessorBen:
+
+    def __init__(self, card_list):
+        self._card_list = card_list
+        self._current_card_index = 0
+    
+    @property
+    def current_card(self):
+        return self._card_list[self._current_card_index]
+    
+    def current_card_reply(self, answer, duration=None, confidence=None):
+        self._current_card_index += 1       # TODO
+
+
 def assess(card, today=None):
     grade = 0
 

@@ -15,14 +15,26 @@ HAS_NEVER_BEEN_REVIEWED = 0
 class ProfessorBen:
 
     def __init__(self, card_list):
-        self._card_list = card_list
+        self._card_list = []
+
+        for card in card_list:
+            grade = assess(card)
+            card["grade"] = grade
+
+            if grade != DONT_REVIEW_THIS_TODAY:
+                self._card_list.append(card)
+
         self._current_card_index = 0
     
     @property
     def current_card(self):
-        return self._card_list[self._current_card_index]
+        _current_card = None
+        if len(self._card_list) > 0:
+            _current_card = self._card_list[self._current_card_index]
+        return _current_card
     
     def current_card_reply(self, answer, duration=None, confidence=None):
+        # TODO
         self._current_card_index += 1       # TODO
 
 
@@ -42,7 +54,7 @@ def assess(card, today=None):
         #review_list.sort(key=lambda x: x["rdate"])
 
         if today is None:
-            today = datetime.datetime.now().date()
+            today = datetime.datetime.now()   #.date()    # TODO
         
         for review in review_list:
             rdate = review["rdate"]

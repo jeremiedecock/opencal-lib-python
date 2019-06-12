@@ -18,24 +18,27 @@ class ProfessorBen:
         self._card_list = []
 
         for card in card_list:
-            grade = assess(card)
-            card["grade"] = grade
+            if not card["hidden"]:
+                grade = assess(card)
+                card["grade"] = grade
 
-            if grade != DONT_REVIEW_THIS_TODAY:
-                self._card_list.append(card)
+                if grade != DONT_REVIEW_THIS_TODAY:
+                    self._card_list.append(card)
 
-        self._current_card_index = 0
-    
+        self._card_list.sort(key=lambda _card : _card["grade"])
+
     @property
     def current_card(self):
-        _current_card = None
-        if len(self._card_list) > 0:
-            _current_card = self._card_list[self._current_card_index]
-        return _current_card
-    
+        return self._card_list[0] if len(self._card_list) > 0 else None
+
     def current_card_reply(self, answer, duration=None, confidence=None):
-        # TODO
-        self._current_card_index += 1       # TODO
+        if len(self._card_list) > 0:
+            card = self._card_list.pop(0)
+
+            if answer == "skip":
+                self._card_list.append(card)
+            else:
+                pass # TODO : card["reviews"].append(...)
 
 
 def assess(card, today=None):

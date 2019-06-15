@@ -2,7 +2,7 @@ import pandas as pd
 import copy
 
 RIGHT_ANSWER_STR = "good"
-WRONG_ANSWER_STR = "wrong"
+WRONG_ANSWER_STR = "bad"
 
 def card_list_to_dataframes(card_list):
     flat_card_list = []

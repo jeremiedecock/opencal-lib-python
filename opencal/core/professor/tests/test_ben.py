@@ -110,10 +110,10 @@ CARD_IGNORE_FUTURE_REVIEWS = {
     }
 
 def test_card_without_review():
-    assert prof.assess(CARD_WITHOUT_REVIEW, BOGUS_CURRENT_DATE) == prof.HAS_NEVER_BEEN_REVIEWED
+    assert prof.assess(CARD_WITHOUT_REVIEW, BOGUS_CURRENT_DATE) == prof.GRADE_CARD_NEVER_REVIEWED
 
 def test_card_made_today():
-    assert prof.assess(CARD_MADE_TODAY, BOGUS_CURRENT_DATE) == prof.DONT_REVIEW_THIS_TODAY
+    assert prof.assess(CARD_MADE_TODAY, BOGUS_CURRENT_DATE) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_basic_card():
     assert prof.assess(CARD_BASIC, BOGUS_CURRENT_DATE) == 2

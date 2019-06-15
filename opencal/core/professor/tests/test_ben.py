@@ -22,8 +22,26 @@ CARD_WITHOUT_REVIEW = {
         "reviews": []
     }
 
+CARD_WITHOUT_REVIEW_2 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1)
+    }
+
 CARD_MADE_TODAY = {
         "cdate": BOGUS_CURRENT_DATE,
+        "reviews": []
+    }
+
+CARD_MADE_TODAY_2 = {
+        "cdate": BOGUS_CURRENT_DATE
+    }
+
+CARD_MADE_TODAY_WITH_TIME = {
+        "cdate": datetime.datetime(year=2000, month=1, day=1, hour=0, minute=1),
+        "reviews": []
+    }
+
+CARD_MADE_YESTERDAY_WITH_TIME = {
+        "cdate": datetime.datetime(year=1999, month=12, day=31, hour=23, minute=59),
         "reviews": []
     }
 
@@ -91,6 +109,20 @@ CARD_IGNORE_PREMATURE_BAD_REVIEWS = {
         ]
     }
 
+CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1), # <- Too early, but as it's a "bad" answer, it should *not* be ignored.
+                "result": "bad"
+            }
+        ]
+    }
+
 CARD_IGNORE_FUTURE_REVIEWS = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
         "reviews": [
@@ -109,11 +141,65 @@ CARD_IGNORE_FUTURE_REVIEWS = {
         ]
     }
 
+CARD_WRONG_REVIEW_YESTERDAY = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=7),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+                "result": "bad"
+            }
+        ]
+    }
+
+CARD_WRONG_REVIEW_TODAY = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=7),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
+                "result": "good"
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE,
+                "result": "bad"
+            }
+        ]
+    }
+
 def test_card_without_review():
     assert prof.assess(CARD_WITHOUT_REVIEW, BOGUS_CURRENT_DATE) == prof.GRADE_CARD_NEVER_REVIEWED
 
+def test_card_without_review_2():
+    assert prof.assess(CARD_WITHOUT_REVIEW_2, BOGUS_CURRENT_DATE) == prof.GRADE_CARD_NEVER_REVIEWED
+
 def test_card_made_today():
     assert prof.assess(CARD_MADE_TODAY, BOGUS_CURRENT_DATE) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+
+def test_card_made_today_with_time():
+    assert prof.assess(CARD_MADE_TODAY_WITH_TIME, BOGUS_CURRENT_DATE) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+
+def test_card_made_yesterday_with_time():
+    assert prof.assess(CARD_MADE_YESTERDAY_WITH_TIME, BOGUS_CURRENT_DATE) == prof.GRADE_CARD_NEVER_REVIEWED
+
+def test_card_made_today_with_time_2():
+    assert prof.assess(CARD_MADE_TODAY_WITH_TIME, datetime.datetime(year=2000, month=1, day=1, hour=8, minute=1)) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+
+def test_card_made_yesterday_with_time_2():
+    assert prof.assess(CARD_MADE_YESTERDAY_WITH_TIME, datetime.datetime(year=2000, month=1, day=1, hour=8, minute=1)) == prof.GRADE_CARD_NEVER_REVIEWED
+
+def test_card_made_today_2():
+    assert prof.assess(CARD_MADE_TODAY_2, BOGUS_CURRENT_DATE) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_basic_card():
     assert prof.assess(CARD_BASIC, BOGUS_CURRENT_DATE) == 2
@@ -129,5 +215,14 @@ def test_ignore_premature_right_reviews():
 def test_ignore_premature_bad_reviews():
     assert prof.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, BOGUS_CURRENT_DATE) == 0
 
+def test_ignore_premature_bad_reviews_yesterday():
+    assert prof.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, BOGUS_CURRENT_DATE) == prof.GRADE_CARD_WRONG_YESTERDAY
+
 def test_ignore_future_reviews():
     assert prof.assess(CARD_IGNORE_FUTURE_REVIEWS, BOGUS_CURRENT_DATE) == 2
+
+def test_card_wrong_review_yesterday():
+    assert prof.assess(CARD_WRONG_REVIEW_YESTERDAY, BOGUS_CURRENT_DATE) == prof.GRADE_CARD_WRONG_YESTERDAY
+
+def test_card_wrong_review_today():
+    assert prof.assess(CARD_WRONG_REVIEW_TODAY, BOGUS_CURRENT_DATE) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY

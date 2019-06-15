@@ -42,13 +42,24 @@ class ProfessorBen:
                 pass # TODO : card["reviews"].append(...)
 
 
+def datetime_to_date(d):
+    '''If the object is an instance of datetime.datetime then convert it to a datetime.datetime.date object.
+
+    If it's already a date object, do nothing.'''
+
+    if isinstance(d, datetime.datetime):
+        d = d.date()
+    return d
+
+
 def assess(card, today=None):
     grade = 0
 
-    cdate = card["cdate"]
+    cdate = datetime_to_date(card["cdate"])
 
     if today is None:
-        today = datetime.datetime.now()   #.date()    # TODO
+        today = datetime.datetime.now().date()
+    today = datetime_to_date(today)
 
     if "reviews" in card.keys() and len(card["reviews"]) > 0:
         # There is at least one review
@@ -59,13 +70,16 @@ def assess(card, today=None):
         assert all(review_list[i]["rdate"] <= review_list[i+1]["rdate"] for i in range(len(review_list)-1))
         #review_list.sort(key=lambda x: x["rdate"])
 
-        if review_list[-1]["result"] == WRONG_ANSWER_STR:
+        yesterday = today - datetime.timedelta(days=1)
+        last_review_result = review_list[-1]["result"]
+        last_review_rdate = datetime_to_date(review_list[-1]["rdate"])
+        if last_review_result == WRONG_ANSWER_STR and last_review_rdate == yesterday:
             grade = GRADE_CARD_WRONG_YESTERDAY
         else:
             expected_revision_date = get_expected_revision_date(cdate, grade)
 
             for review in review_list:
-                rdate = review["rdate"]
+                rdate = datetime_to_date(review["rdate"])
                 result = review["result"]
 
                 if rdate <= today:                            # Ignore future reviews

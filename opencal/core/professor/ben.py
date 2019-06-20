@@ -38,8 +38,20 @@ class ProfessorBen:
 
             if answer == "skip":
                 self._card_list.append(card)
+            elif answer == RIGHT_ANSWER_STR:
+                review = {
+                    "rdate": datetime.datetime.now().date(),
+                    "result": RIGHT_ANSWER_STR
+                }
+                card["reviews"].append(review)
+            elif answer == WRONG_ANSWER_STR:
+                review = {
+                    "rdate": datetime.datetime.now().date(),
+                    "result": WRONG_ANSWER_STR
+                }
+                card["reviews"].append(review)
             else:
-                pass # TODO : card["reviews"].append(...)
+                raise ValueError("Unknown answer : {}".format(answer))
 
 
 def datetime_to_date(d):

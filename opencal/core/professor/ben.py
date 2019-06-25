@@ -13,6 +13,11 @@ GRADE_CARD_NEVER_REVIEWED = -1
 GRADE_CARD_WRONG_YESTERDAY = -2
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -3
 
+DEBUG = False
+
+if DEBUG:
+    import hashlib
+
 class ProfessorBen:
 
     def __init__(self, card_list):
@@ -27,6 +32,14 @@ class ProfessorBen:
                     self._card_list.append(card)
 
         self._card_list.sort(key=lambda _card : _card["grade"])
+
+        # The following bloc is useful to compare different implementations of Ben (i.e. Java VS Python)
+        if DEBUG:
+            for card in self._card_list:
+                question = card["question"]
+                answer = card["answer"]
+                print(hashlib.md5(question.encode('utf-8')).hexdigest(),
+                      hashlib.md5(answer.encode('utf-8')).hexdigest())
 
     @property
     def current_card(self):

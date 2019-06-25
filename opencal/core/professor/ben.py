@@ -32,12 +32,13 @@ class ProfessorBen:
     def current_card(self):
         return self._card_list[0] if len(self._card_list) > 0 else None
 
-    def current_card_reply(self, answer, duration=None, confidence=None):
+    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
         if len(self._card_list) > 0:
             card = self._card_list.pop(0)
 
             if answer == "skip":
-                self._card_list.append(card)
+                if not hide:
+                    self._card_list.append(card)
             elif answer == RIGHT_ANSWER_STR:
                 review = {
                     "rdate": datetime.datetime.now().date(),
@@ -52,6 +53,9 @@ class ProfessorBen:
                 card["reviews"].append(review)
             else:
                 raise ValueError("Unknown answer : {}".format(answer))
+
+            if hide:
+                card["hidden"] = True
 
 
 def datetime_to_date(d):

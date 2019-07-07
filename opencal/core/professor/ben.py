@@ -20,12 +20,17 @@ if DEBUG:
 
 class ProfessorBen:
 
-    def __init__(self, card_list):
+    def __init__(self, card_list, date_mock=None):
         self._card_list = []
+
+        if date_mock is None:
+            self._date = datetime.date
+        else:
+            self._date = date_mock
 
         for card in card_list:
             if not card["hidden"]:
-                grade = assess(card)
+                grade = assess(card, date_mock=date_mock)
                 card["grade"] = grade
 
                 if grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
@@ -54,13 +59,13 @@ class ProfessorBen:
                     self._card_list.append(card)
             elif answer == RIGHT_ANSWER_STR:
                 review = {
-                    "rdate": datetime.datetime.now().date(),
+                    "rdate": self._date.today(),
                     "result": RIGHT_ANSWER_STR
                 }
                 card["reviews"].append(review)
             elif answer == WRONG_ANSWER_STR:
                 review = {
-                    "rdate": datetime.datetime.now().date(),
+                    "rdate": self._date.today(),
                     "result": WRONG_ANSWER_STR
                 }
                 card["reviews"].append(review)
@@ -81,14 +86,15 @@ def datetime_to_date(d):
     return d
 
 
-def assess(card, today=None):
+def assess(card, date_mock=None):
     grade = 0
 
     cdate = datetime_to_date(card["cdate"])
 
-    if today is None:
-        today = datetime.datetime.now().date()
-    today = datetime_to_date(today)
+    if date_mock is None:
+        today = datetime.date.today()
+    else:
+        today = date_mock.today()
 
     if "reviews" in card.keys() and len(card["reviews"]) > 0:
         # There is at least one review

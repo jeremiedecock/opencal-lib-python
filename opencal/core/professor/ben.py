@@ -1,6 +1,5 @@
-"""Ben is a little more professional than Alan.
-He doesn't validate reviews when it's too early...
-but he doesn't care about late.
+"""Ben is the first professor implemented for long-term memory training in OpenCAL.
+This professor doesn't validate reviews when it's too early...
 """
 
 import copy

@@ -10,16 +10,13 @@ import opencal.core.professor.ben as prof
 from opencal.core.mocks import DateMock
 
 import datetime
-import numpy as np
-import os
 import pytest
-import tempfile
 
 BOGUS_CURRENT_DATE = datetime.date(year=2000, month=1, day=1)
 
 DateMock.set_today(BOGUS_CURRENT_DATE)
 
-# Test the "load_pkb" and "save_pkb" functions ################################
+# Test the "assess" function ##################################################
 
 CARD_WITHOUT_REVIEW = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),

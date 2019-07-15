@@ -5,10 +5,11 @@
 This module contains unit tests for the "opencal.core.professor.ben" module.
 """
 
-import opencal.core.professor.ben as prof
+from opencal.core.professor import ben
 
 from opencal.core.mocks import DateMock
 
+import copy
 import datetime
 import pytest
 
@@ -16,7 +17,11 @@ BOGUS_CURRENT_DATE = datetime.date(year=2000, month=1, day=1)
 
 DateMock.set_today(BOGUS_CURRENT_DATE)
 
-# Test the "assess" function ##################################################
+###############################################################################
+# TEST THE "assess" FUNCTION                                                  #
+###############################################################################
+
+# CARDS ###################################################
 
 CARD_WITHOUT_REVIEW = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
@@ -178,46 +183,152 @@ CARD_WRONG_REVIEW_TODAY = {
         ]
     }
 
+# TEST FUNCTIONS ##########################################
+
 def test_card_without_review():
-    assert prof.assess(CARD_WITHOUT_REVIEW, DateMock) == prof.GRADE_CARD_NEVER_REVIEWED
+    assert ben.assess(CARD_WITHOUT_REVIEW, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
 
 def test_card_without_review_2():
-    assert prof.assess(CARD_WITHOUT_REVIEW_2, DateMock) == prof.GRADE_CARD_NEVER_REVIEWED
+    assert ben.assess(CARD_WITHOUT_REVIEW_2, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
 
 def test_card_made_today():
-    assert prof.assess(CARD_MADE_TODAY, DateMock) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert ben.assess(CARD_MADE_TODAY, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_card_made_today_with_time():
-    assert prof.assess(CARD_MADE_TODAY_WITH_TIME, DateMock) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert ben.assess(CARD_MADE_TODAY_WITH_TIME, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_card_made_yesterday_with_time():
-    assert prof.assess(CARD_MADE_YESTERDAY_WITH_TIME, DateMock) == prof.GRADE_CARD_NEVER_REVIEWED
+    assert ben.assess(CARD_MADE_YESTERDAY_WITH_TIME, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
 
 def test_card_made_today_2():
-    assert prof.assess(CARD_MADE_TODAY_2, DateMock) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert ben.assess(CARD_MADE_TODAY_2, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_basic_card():
-    assert prof.assess(CARD_BASIC, DateMock) == 2
+    assert ben.assess(CARD_BASIC, DateMock) == 2
 
 def test_reviews_not_sorted():
-    #assert prof.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
+    #assert ben.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
     with pytest.raises(AssertionError):
-        prof.assess(CARD_REVIEWS_NOT_SORTED, DateMock)
+        ben.assess(CARD_REVIEWS_NOT_SORTED, DateMock)
 
 def test_ignore_premature_right_reviews():
-    assert prof.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, DateMock) == 1
+    assert ben.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, DateMock) == 1
 
 def test_ignore_premature_bad_reviews():
-    assert prof.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, DateMock) == 0
+    assert ben.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, DateMock) == 0
 
 def test_ignore_premature_bad_reviews_yesterday():
-    assert prof.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == prof.GRADE_CARD_WRONG_YESTERDAY
+    assert ben.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == ben.GRADE_CARD_WRONG_YESTERDAY
 
 def test_ignore_future_reviews():
-    assert prof.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
+    assert ben.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
 
 def test_card_wrong_review_yesterday():
-    assert prof.assess(CARD_WRONG_REVIEW_YESTERDAY, DateMock) == prof.GRADE_CARD_WRONG_YESTERDAY
+    assert ben.assess(CARD_WRONG_REVIEW_YESTERDAY, DateMock) == ben.GRADE_CARD_WRONG_YESTERDAY
 
 def test_card_wrong_review_today():
-    assert prof.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == prof.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert ben.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+
+
+###############################################################################
+# TEST THE "current_card" AND "current_card_reply" FUNCTIONS                  #
+###############################################################################
+
+# CARDS ###################################################
+
+CARD_1 = {
+            'reviews': [],
+            'tags': ['baz'],
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_2 = {
+            'reviews': [],
+            'tags': ['baz'],
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+HIDDEN_CARD_1 = {
+            'reviews': [],
+            'tags': ['baz'],
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+            'hidden': True,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+# CARD LISTS ##############################################
+
+EMPTY_CARD_LIST = []
+
+ONE_HIDDEN_CARD = [HIDDEN_CARD_1]
+
+# TEST FUNCTIONS ##########################################
+
+def test_empty_card_list():
+    prof = ben.ProfessorBen(EMPTY_CARD_LIST)
+    assert prof.current_card == None
+
+def test_one_card_right():
+    card_1 = copy.deepcopy(CARD_1)
+
+    prof = ben.ProfessorBen([card_1], date_mock=DateMock)
+
+    current_card = prof.current_card
+    assert current_card == card_1
+    prof.current_card_reply(answer="skip")
+
+    current_card = prof.current_card
+    assert current_card == card_1
+    prof.current_card_reply(answer="good")
+
+    current_card = prof.current_card
+    assert current_card == None
+
+def test_one_card_wrong():
+    card_1 = copy.deepcopy(CARD_1)
+
+    prof = ben.ProfessorBen([card_1], date_mock=DateMock)
+
+    current_card = prof.current_card
+    assert current_card == card_1
+    prof.current_card_reply(answer="skip")
+
+    current_card = prof.current_card
+    assert current_card == card_1
+    prof.current_card_reply(answer="bad")
+
+    current_card = prof.current_card
+    assert current_card == None
+
+def test_one_hidden_card():
+    prof = ben.ProfessorBen(copy.deepcopy(ONE_HIDDEN_CARD))
+    assert prof.current_card == None
+
+def test_several_cards():
+    card_1 = copy.deepcopy(CARD_1)
+    card_2 = copy.deepcopy(CARD_2)
+
+    prof = ben.ProfessorBen([card_1, card_2],
+                            date_mock=DateMock)
+
+    current_card = prof.current_card
+    assert current_card == card_1
+    prof.current_card_reply(answer="skip")
+
+    current_card = prof.current_card
+    assert current_card == card_2
+    prof.current_card_reply(answer="bad")
+
+    current_card = prof.current_card
+    assert current_card == card_1
+    prof.current_card_reply(answer="good")
+
+    current_card = prof.current_card
+    assert current_card == None

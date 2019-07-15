@@ -5,7 +5,7 @@
 This module contains unit tests for the "opencal.core.professor.alice" module.
 """
 
-from opencal.core.professor.alice import ProfessorAlice
+from opencal.core.professor import alice
 
 import datetime
 import random
@@ -52,11 +52,11 @@ SEVERAL_CARDS = [CARD_1, CARD_2]
 # TEST FUNCTIONS ##########################################
 
 def test_empty_card_list():
-    prof = ProfessorAlice(EMPTY_CARD_LIST)
+    prof = alice.ProfessorAlice(EMPTY_CARD_LIST)
     assert prof.current_card == None
 
 def test_one_card():
-    prof = ProfessorAlice(ONE_CARD)
+    prof = alice.ProfessorAlice(ONE_CARD)
 
     current_card = prof.current_card
     assert current_card == CARD_1
@@ -74,13 +74,13 @@ def test_one_card():
     assert current_card == None
 
 def test_one_hidden_card():
-    prof = ProfessorAlice(ONE_HIDDEN_CARD)
+    prof = alice.ProfessorAlice(ONE_HIDDEN_CARD)
     assert prof.current_card == None
 
 def test_several_cards():
     random.seed(1)
 
-    prof = ProfessorAlice(SEVERAL_CARDS)
+    prof = alice.ProfessorAlice(SEVERAL_CARDS)
 
     current_card = prof.current_card
     assert current_card == CARD_2

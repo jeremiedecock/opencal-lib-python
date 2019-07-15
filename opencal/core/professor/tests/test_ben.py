@@ -18,10 +18,8 @@ BOGUS_CURRENT_DATE = datetime.date(year=2000, month=1, day=1)
 DateMock.set_today(BOGUS_CURRENT_DATE)
 
 ###############################################################################
-# TEST THE "assess" FUNCTION                                                  #
+# CARDS                                                                       #
 ###############################################################################
-
-# CARDS ###################################################
 
 CARD_WITHOUT_REVIEW = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
@@ -51,7 +49,7 @@ CARD_MADE_YESTERDAY_WITH_TIME = {
         "reviews": []
     }
 
-CARD_BASIC = {
+CARD_BASIC_1 = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
         "reviews": [
             {
@@ -68,6 +66,24 @@ CARD_BASIC = {
             }
         ]
     }
+
+CARD_BASIC_2 = {
+            'reviews': [],
+            'tags': ['baz'],
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_BASIC_3 = {
+            'reviews': [],
+            'tags': ['baz'],
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
 
 CARD_REVIEWS_NOT_SORTED = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
@@ -183,7 +199,28 @@ CARD_WRONG_REVIEW_TODAY = {
         ]
     }
 
-# TEST FUNCTIONS ##########################################
+CARD_HIDDEN = {
+            'reviews': [],
+            'tags': ['baz'],
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+            'hidden': True,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+
+###############################################################################
+# CARD LISTS                                                                  #
+###############################################################################
+
+EMPTY_CARD_LIST = []
+
+ONE_HIDDEN_CARD = [CARD_HIDDEN]
+
+
+###############################################################################
+# TEST THE "assess" FUNCTION                                                  #
+###############################################################################
 
 def test_card_without_review():
     assert ben.assess(CARD_WITHOUT_REVIEW, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
@@ -204,7 +241,7 @@ def test_card_made_today_2():
     assert ben.assess(CARD_MADE_TODAY_2, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_basic_card():
-    assert ben.assess(CARD_BASIC, DateMock) == 2
+    assert ben.assess(CARD_BASIC_1, DateMock) == 2
 
 def test_reviews_not_sorted():
     #assert ben.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
@@ -234,49 +271,12 @@ def test_card_wrong_review_today():
 # TEST THE "current_card" AND "current_card_reply" FUNCTIONS                  #
 ###############################################################################
 
-# CARDS ###################################################
-
-CARD_1 = {
-            'reviews': [],
-            'tags': ['baz'],
-            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
-            'hidden': False,
-            'question': 'foo',
-            'answer': 'bar'
-        }
-
-CARD_2 = {
-            'reviews': [],
-            'tags': ['baz'],
-            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
-            'hidden': False,
-            'question': 'foo',
-            'answer': 'bar'
-        }
-
-HIDDEN_CARD_1 = {
-            'reviews': [],
-            'tags': ['baz'],
-            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
-            'hidden': True,
-            'question': 'foo',
-            'answer': 'bar'
-        }
-
-# CARD LISTS ##############################################
-
-EMPTY_CARD_LIST = []
-
-ONE_HIDDEN_CARD = [HIDDEN_CARD_1]
-
-# TEST FUNCTIONS ##########################################
-
 def test_empty_card_list():
     prof = ben.ProfessorBen(EMPTY_CARD_LIST)
     assert prof.current_card == None
 
 def test_one_card_right():
-    card_1 = copy.deepcopy(CARD_1)
+    card_1 = copy.deepcopy(CARD_BASIC_2)
 
     prof = ben.ProfessorBen([card_1], date_mock=DateMock)
 
@@ -292,7 +292,7 @@ def test_one_card_right():
     assert current_card == None
 
 def test_one_card_wrong():
-    card_1 = copy.deepcopy(CARD_1)
+    card_1 = copy.deepcopy(CARD_BASIC_2)
 
     prof = ben.ProfessorBen([card_1], date_mock=DateMock)
 
@@ -312,8 +312,8 @@ def test_one_hidden_card():
     assert prof.current_card == None
 
 def test_several_cards():
-    card_1 = copy.deepcopy(CARD_1)
-    card_2 = copy.deepcopy(CARD_2)
+    card_1 = copy.deepcopy(CARD_BASIC_2)
+    card_2 = copy.deepcopy(CARD_BASIC_3)
 
     prof = ben.ProfessorBen([card_1, card_2],
                             date_mock=DateMock)

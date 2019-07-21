@@ -521,6 +521,76 @@ def test_one_card_wrong():
     current_card = prof.current_card
     assert current_card == None
 
+def test_right_wrong_and_hide_reply():
+    """Test `professor.current_card` and `professor.current_card_reply()`.
+
+    Check that:
+    - `professor.current_card_reply(answer=RIGHT_ANSWER_STR, hide=True)` remove
+      the card from the stack and add the right "review" item to the card and
+      hide the card ;
+    - `professor.current_card_reply(answer=WRONG_ANSWER_STR, hide=True)` remove
+      the card from the stack and add the right "review" item to the card and
+      hide the card ;
+    - `professor.current_card` returns `None` when there are no more cards to
+      review.
+    """
+    card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
+    card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+
+    prof = ben.ProfessorBen([card_level0_age5, card_level0_age4],
+                            date_mock=DateMock)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age5
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR, hide=True)
+
+    assert card_level0_age5["reviews"][-1]['rdate'] == BOGUS_CURRENT_DATE
+    assert card_level0_age5["reviews"][-1]['result'] == RIGHT_ANSWER_STR
+    assert card_level0_age5['hidden'] == True
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age4
+    prof.current_card_reply(answer=WRONG_ANSWER_STR, hide=True)
+
+    assert card_level0_age4["reviews"][-1]['rdate'] == BOGUS_CURRENT_DATE
+    assert card_level0_age4["reviews"][-1]['result'] == WRONG_ANSWER_STR
+    assert card_level0_age4['hidden'] == True
+
+    current_card = prof.current_card
+    assert current_card == None
+
+def test_hide_cards():
+    """Test `professor.current_card` and `professor.current_card_reply()`.
+
+    Check that:
+    - `professor.current_card_reply(answer="skip", hide=True)` remove
+      the card from the stack and hide the card without adding any review item;
+    - `professor.current_card` returns `None` when there are no more cards to
+      review.
+    """
+    card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
+    card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+
+    prof = ben.ProfessorBen([card_level0_age5, card_level0_age4],
+                            date_mock=DateMock)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age5
+    prof.current_card_reply(answer="skip", hide=True)
+
+    assert len(card_level0_age5["reviews"]) == len(CARD_BASIC_LEVEL0_2["reviews"])
+    assert card_level0_age5['hidden'] == True
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age4
+    prof.current_card_reply(answer="skip", hide=True)
+
+    assert len(card_level0_age4["reviews"]) == len(CARD_BASIC_LEVEL0_1["reviews"])
+    assert card_level0_age4['hidden'] == True
+
+    current_card = prof.current_card
+    assert current_card == None
+
 def test_one_hidden_card():
     """Test `professor.current_card` and `professor.current_card_reply()`.
 
@@ -624,7 +694,7 @@ def test_several_cards():
 
     current_card = prof.current_card
     assert current_card == card_level0_age5
-    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+    prof.current_card_reply(answer="skip")
 
     current_card = prof.current_card
     assert current_card == card_level0_age4
@@ -648,6 +718,12 @@ def test_several_cards():
 
     current_card = prof.current_card
     assert current_card == card_level2_age10
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age5
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     current_card = prof.current_card

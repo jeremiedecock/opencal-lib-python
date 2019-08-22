@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.alice" module.
+This module contains unit tests for the "opencal.core.professor.itm.alice" module.
 """
 
-from opencal.core.professor import alice
+from opencal.core.professor.itm import alice
 
 import datetime
 import random

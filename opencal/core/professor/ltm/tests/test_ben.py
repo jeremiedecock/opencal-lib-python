@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.ben" module.
+This module contains unit tests for the "opencal.core.professor.ltm.ben" module.
 """
 
-from opencal.core.professor import ben
+from opencal.core.professor.ltm import ben
 
 from opencal.core.mocks import DateMock
 

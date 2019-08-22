@@ -1,4 +1,4 @@
-"""Ben is the first professor implemented for long-term memory training in OpenCAL.
+"""Alice is the first professor implemented for long-term memory training in OpenCAL.
 This professor doesn't validate reviews when it's too early...
 """
 
@@ -17,7 +17,7 @@ DEBUG = False
 if DEBUG:
     import hashlib
 
-class ProfessorBen:
+class ProfessorAlice:
 
     def __init__(self, card_list, date_mock=None):
         self._card_list = []
@@ -37,7 +37,7 @@ class ProfessorBen:
 
         self._card_list.sort(key=lambda _card : _card["grade"])
 
-        # The following bloc is useful to compare different implementations of Ben (i.e. Java VS Python)
+        # The following bloc is useful to compare different implementations of Alice (i.e. Java VS Python)
         if DEBUG:
             for card in self._card_list:
                 question = card["question"]

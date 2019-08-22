@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.ltm.ben" module.
+This module contains unit tests for the "opencal.core.professor.ltm.alice" module.
 """
 
-from opencal.core.professor.ltm import ben
+from opencal.core.professor.ltm import alice
 
 from opencal.core.mocks import DateMock
 
@@ -404,50 +404,50 @@ ONE_HIDDEN_CARD = [CARD_HIDDEN]
 ###############################################################################
 
 def test_card_without_review():
-    assert ben.assess(CARD_WITHOUT_REVIEW, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
-    assert ben.assess(CARD_BASIC_LEVEL_MINUS1_1, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
-    assert ben.assess(CARD_BASIC_LEVEL_MINUS1_2, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
+    assert alice.assess(CARD_WITHOUT_REVIEW, DateMock) == alice.GRADE_CARD_NEVER_REVIEWED
+    assert alice.assess(CARD_BASIC_LEVEL_MINUS1_1, DateMock) == alice.GRADE_CARD_NEVER_REVIEWED
+    assert alice.assess(CARD_BASIC_LEVEL_MINUS1_2, DateMock) == alice.GRADE_CARD_NEVER_REVIEWED
 
 def test_card_made_today():
-    assert ben.assess(CARD_MADE_TODAY, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert alice.assess(CARD_MADE_TODAY, DateMock) == alice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_card_made_today_with_time():
-    assert ben.assess(CARD_MADE_TODAY_WITH_TIME, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert alice.assess(CARD_MADE_TODAY_WITH_TIME, DateMock) == alice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_card_made_yesterday_with_time():
-    assert ben.assess(CARD_MADE_YESTERDAY_WITH_TIME, DateMock) == ben.GRADE_CARD_NEVER_REVIEWED
+    assert alice.assess(CARD_MADE_YESTERDAY_WITH_TIME, DateMock) == alice.GRADE_CARD_NEVER_REVIEWED
 
 def test_basic_cards():
-    assert ben.assess(CARD_BASIC_LEVEL0_1, DateMock) == 0
-    assert ben.assess(CARD_BASIC_LEVEL0_2, DateMock) == 0
-    assert ben.assess(CARD_BASIC_LEVEL1_1, DateMock) == 1
-    assert ben.assess(CARD_BASIC_LEVEL2_1, DateMock) == 2
-    assert ben.assess(CARD_BASIC_LEVEL2_2, DateMock) == 2
-    assert ben.assess(CARD_BASIC_LEVEL2_3, DateMock) == 2
+    assert alice.assess(CARD_BASIC_LEVEL0_1, DateMock) == 0
+    assert alice.assess(CARD_BASIC_LEVEL0_2, DateMock) == 0
+    assert alice.assess(CARD_BASIC_LEVEL1_1, DateMock) == 1
+    assert alice.assess(CARD_BASIC_LEVEL2_1, DateMock) == 2
+    assert alice.assess(CARD_BASIC_LEVEL2_2, DateMock) == 2
+    assert alice.assess(CARD_BASIC_LEVEL2_3, DateMock) == 2
 
 def test_reviews_not_sorted():
-    #assert ben.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
+    #assert alice.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
     with pytest.raises(AssertionError):
-        ben.assess(CARD_REVIEWS_NOT_SORTED, DateMock)
+        alice.assess(CARD_REVIEWS_NOT_SORTED, DateMock)
 
 def test_ignore_premature_right_reviews():
-    assert ben.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, DateMock) == 1
+    assert alice.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, DateMock) == 1
 
 def test_ignore_premature_bad_reviews():
-    assert ben.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, DateMock) == 0
+    assert alice.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, DateMock) == 0
 
 def test_ignore_premature_bad_reviews_yesterday():
-    assert ben.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == ben.GRADE_CARD_WRONG_YESTERDAY
+    assert alice.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == alice.GRADE_CARD_WRONG_YESTERDAY
 
 def test_ignore_future_reviews():
-    assert ben.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
+    assert alice.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
 
 def test_card_wrong_review_yesterday():
-    assert ben.assess(CARD_WRONG_REVIEW_YESTERDAY, DateMock) == ben.GRADE_CARD_WRONG_YESTERDAY
+    assert alice.assess(CARD_WRONG_REVIEW_YESTERDAY, DateMock) == alice.GRADE_CARD_WRONG_YESTERDAY
 
 def test_card_wrong_review_today():
-    assert ben.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
-    assert ben.assess(CARD_NOT_TO_BE_REVIEWED_TODAY, DateMock) == ben.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert alice.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == alice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert alice.assess(CARD_NOT_TO_BE_REVIEWED_TODAY, DateMock) == alice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 
 ###############################################################################
@@ -460,7 +460,7 @@ def test_empty_card_list():
 
     Check that `professor.current_card` returns `None` on empty card lists.
     """
-    prof = ben.ProfessorBen(EMPTY_CARD_LIST)
+    prof = alice.ProfessorAlice(EMPTY_CARD_LIST)
     assert prof.current_card == None
 
 def test_one_card_right():
@@ -476,7 +476,7 @@ def test_one_card_right():
     """
     card_1 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = ben.ProfessorBen([card_1], date_mock=DateMock)
+    prof = alice.ProfessorAlice([card_1], date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_1
@@ -505,7 +505,7 @@ def test_one_card_wrong():
     """
     card_1 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = ben.ProfessorBen([card_1], date_mock=DateMock)
+    prof = alice.ProfessorAlice([card_1], date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_1
@@ -537,8 +537,8 @@ def test_right_wrong_and_hide_reply():
     card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = ben.ProfessorBen([card_level0_age5, card_level0_age4],
-                            date_mock=DateMock)
+    prof = alice.ProfessorAlice([card_level0_age5, card_level0_age4],
+                                date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_level0_age5
@@ -571,8 +571,8 @@ def test_hide_cards():
     card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = ben.ProfessorBen([card_level0_age5, card_level0_age4],
-                            date_mock=DateMock)
+    prof = alice.ProfessorAlice([card_level0_age5, card_level0_age4],
+                                date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_level0_age5
@@ -599,7 +599,7 @@ def test_one_hidden_card():
     - `professor.current_card` returns `None` when card lists contains hidden
       cards only.
     """
-    prof = ben.ProfessorBen(copy.deepcopy(ONE_HIDDEN_CARD))
+    prof = alice.ProfessorAlice(copy.deepcopy(ONE_HIDDEN_CARD))
     assert prof.current_card == None
 
 def test_three_cards_two_hidden():
@@ -616,8 +616,8 @@ def test_three_cards_two_hidden():
     card_2 = copy.deepcopy(CARD_BASIC_LEVEL2_1)
     card_3 = copy.deepcopy(CARD_HIDDEN)
 
-    prof = ben.ProfessorBen([card_1, card_2, card_3],
-                            date_mock=DateMock)
+    prof = alice.ProfessorAlice([card_1, card_2, card_3],
+                                date_mock=DateMock)
     
     current_card = prof.current_card
     assert current_card == card_2
@@ -681,8 +681,8 @@ def test_several_cards():
             card_level_min3_age0,
         ]
     
-    prof = ben.ProfessorBen(card_list,
-                            date_mock=DateMock)
+    prof = alice.ProfessorAlice(card_list,
+                                date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_level_min2_age8

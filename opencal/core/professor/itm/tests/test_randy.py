@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.itm.alice" module.
+This module contains unit tests for the "opencal.core.professor.itm.randy" module.
 """
 
-from opencal.core.professor.itm import alice
+from opencal.core.professor.itm import randy
 
 import datetime
 import random
@@ -52,11 +52,11 @@ SEVERAL_CARDS = [CARD_1, CARD_2]
 # TEST FUNCTIONS ##########################################
 
 def test_empty_card_list():
-    prof = alice.ProfessorAlice(EMPTY_CARD_LIST)
+    prof = randy.ProfessorRandy(EMPTY_CARD_LIST)
     assert prof.current_card == None
 
 def test_one_card():
-    prof = alice.ProfessorAlice(ONE_CARD)
+    prof = randy.ProfessorRandy(ONE_CARD)
 
     current_card = prof.current_card
     assert current_card == CARD_1
@@ -74,13 +74,13 @@ def test_one_card():
     assert current_card == None
 
 def test_one_hidden_card():
-    prof = alice.ProfessorAlice(ONE_HIDDEN_CARD)
+    prof = randy.ProfessorRandy(ONE_HIDDEN_CARD)
     assert prof.current_card == None
 
 def test_several_cards():
     random.seed(1)
 
-    prof = alice.ProfessorAlice(SEVERAL_CARDS)
+    prof = randy.ProfessorRandy(SEVERAL_CARDS)
 
     current_card = prof.current_card
     assert current_card == CARD_2

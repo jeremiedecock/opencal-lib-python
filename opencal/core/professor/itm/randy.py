@@ -1,5 +1,5 @@
-"""Alice is an implementation of the "classical" flashcard method.
-This professor is mostly used for short term memory training.
+"""Randy randomly pick cards. For each right answer, the card is removed.
+This professor is used for intermediate-term memory training.
 """
 
 import copy
@@ -7,7 +7,7 @@ import random
 
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
-class ProfessorAlice:
+class ProfessorRandy:
 
     def __init__(self, card_list):
         self._card_list = [card for card in card_list if not card["hidden"]]

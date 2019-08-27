@@ -23,8 +23,17 @@ DateMock.set_today(BOGUS_CURRENT_DATE)
 # CARDS                                                                       #
 ###############################################################################
 
-CARD_WITHOUT_REVIEW = {
+CARD_WITHOUT_REVIEW_1 = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+        "reviews": [],
+        'tags': ['baz'],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_WITHOUT_REVIEW_2 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
         "reviews": [],
         'tags': ['baz'],
         'hidden': False,
@@ -98,6 +107,71 @@ CARD_BASIC_LEVEL0_2 = {
                     "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=4),
                     "result": RIGHT_ANSWER_STR
                 },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_BASIC_LEVEL0_3 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=6),
+            'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=4),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=3),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_BASIC_LEVEL0_4 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=3),
+            'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_BASIC_LEVEL0_5 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=7),
+            'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_BASIC_LEVEL0_6 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
+            'reviews': [
+                {
                     "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
                     "result": WRONG_ANSWER_STR
                 }
@@ -318,7 +392,7 @@ CARD_IGNORE_FUTURE_REVIEWS = {
         'answer': 'bar'
     }
 
-CARD_WRONG_REVIEW_YESTERDAY = {
+CARD_WRONG_REVIEW_YESTERDAY_1 = {
         "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
         "reviews": [
             {
@@ -328,6 +402,38 @@ CARD_WRONG_REVIEW_YESTERDAY = {
             {
                 "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
                 "result": RIGHT_ANSWER_STR
+            },
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+                "result": WRONG_ANSWER_STR
+            }
+        ],
+        'tags': ['baz'],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_WRONG_REVIEW_YESTERDAY_2 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+                "result": WRONG_ANSWER_STR
+            }
+        ],
+        'tags': ['baz'],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_WRONG_REVIEW_YESTERDAY_3 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=3),
+        "reviews": [
+            {
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                "result": WRONG_ANSWER_STR
             },
             {
                 "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
@@ -404,7 +510,7 @@ ONE_HIDDEN_CARD = [CARD_HIDDEN]
 ###############################################################################
 
 def test_card_without_review():
-    assert berenice.assess(CARD_WITHOUT_REVIEW, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
+    assert berenice.assess(CARD_WITHOUT_REVIEW_1, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
     assert berenice.assess(CARD_BASIC_LEVEL_MINUS1_1, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
     assert berenice.assess(CARD_BASIC_LEVEL_MINUS1_2, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
 
@@ -443,7 +549,7 @@ def test_ignore_future_reviews():
     assert berenice.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
 
 def test_card_wrong_review_yesterday():
-    assert berenice.assess(CARD_WRONG_REVIEW_YESTERDAY, DateMock) == berenice.GRADE_CARD_WRONG_YESTERDAY
+    assert berenice.assess(CARD_WRONG_REVIEW_YESTERDAY_1, DateMock) == berenice.GRADE_CARD_WRONG_YESTERDAY
 
 def test_card_wrong_review_today():
     assert berenice.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == berenice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
@@ -456,7 +562,7 @@ def test_card_wrong_review_today():
 ###############################################################################
 
 def test_empty_card_list():
-    """Test `professor.current_card`.
+    """Test `professor.current_card` and `professor.switch_grade()`.
 
     Check that `professor.current_card` returns `None` on empty card lists.
     """
@@ -464,7 +570,7 @@ def test_empty_card_list():
     assert prof.current_card == None
 
 def test_one_card_skip():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer="skip")` removes the card from the stack ;
@@ -483,7 +589,7 @@ def test_one_card_skip():
     assert current_card == None
 
 def test_one_card_right():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer=RIGHT_ANSWER_STR)` remove the card from the
@@ -506,7 +612,7 @@ def test_one_card_right():
     assert current_card == None
 
 def test_one_card_wrong():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer="wrong")` remove the card from the
@@ -529,7 +635,7 @@ def test_one_card_wrong():
     assert current_card == None
 
 def test_right_wrong_and_hide_reply():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer=RIGHT_ANSWER_STR, hide=True)` remove
@@ -567,7 +673,7 @@ def test_right_wrong_and_hide_reply():
     assert current_card == None
 
 def test_hide_cards():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer="skip", hide=True)` remove
@@ -599,7 +705,7 @@ def test_hide_cards():
     assert current_card == None
 
 def test_one_hidden_card():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor` exclude hidden cards ;
@@ -610,7 +716,7 @@ def test_one_hidden_card():
     assert prof.current_card == None
 
 def test_three_cards_two_hidden():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor` exclude hidden cards ;
@@ -631,11 +737,68 @@ def test_three_cards_two_hidden():
     current_card = prof.current_card
     assert current_card == None
 
-def test_several_cards():
-    """Test `professor.current_card` and `professor.current_card_reply()`.
+
+def test_max_cards_per_grade():
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card` returns the expected cards ;
+    - no more than `max_cards_per_grade` cards are reviewed ;
+    - `professor.current_card` returns `None` when there are no more cards to
+      review.
+    """
+    card_level0_age8 = copy.deepcopy(CARD_BASIC_LEVEL0_6)
+    card_level0_age7 = copy.deepcopy(CARD_BASIC_LEVEL0_5)
+    card_level0_age6 = copy.deepcopy(CARD_BASIC_LEVEL0_3)
+    card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
+    card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+    card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
+
+    card_list = [
+            card_level0_age8,
+            card_level0_age7,
+            card_level0_age6,
+            card_level0_age5,
+            card_level0_age4,
+            card_level0_age3,
+        ]
+    
+    prof = berenice.ProfessorBerenice(card_list,
+                                      date_mock=DateMock,
+                                      max_cards_per_grade=3)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age8
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age7
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age6
+    prof.current_card_reply(answer="skip")
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age5
+    prof.current_card_reply(answer=WRONG_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age4
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == None
+
+
+def test_several_cards():
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+
+    Check that:
+    - `professor.current_card` returns the expected cards ;
+    - no more than `max_cards_per_grade` cards are reviewed ;
     - `professor` sort well cards: first `GRADE_CARD_WRONG_YESTERDAY` then
       `GRADE_CARD_NEVER_REVIEWED` then cards having grade 0 (cards that have
       never been reviewed and that have been created more than one day ago);
@@ -652,12 +815,18 @@ def test_several_cards():
     card_level_min3_age4 = copy.deepcopy(CARD_NOT_TO_BE_REVIEWED_TODAY)
     card_level_min3_age0 = copy.deepcopy(CARD_MADE_TODAY)
 
-    card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY)
+    card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
+    card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)
+    card_level_min2_age2 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_2)
 
-    card_level_min1_age1 = copy.deepcopy(CARD_WITHOUT_REVIEW)
+    card_level_min1_age1 = copy.deepcopy(CARD_WITHOUT_REVIEW_1)
+    card_level_min1_age2 = copy.deepcopy(CARD_WITHOUT_REVIEW_2)
     
+    card_level0_age7 = copy.deepcopy(CARD_BASIC_LEVEL0_5)
+    card_level0_age6 = copy.deepcopy(CARD_BASIC_LEVEL0_3)
     card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+    card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
     
     card_level1_age10 = copy.deepcopy(CARD_BASIC_LEVEL1_1)
 
@@ -673,20 +842,31 @@ def test_several_cards():
             card_level2_age10,
             card_level1_age10,
             card_level_min3_age8,
-            card_level_min2_age8,
             card_level_min3_age4,
+            card_level_min3_age0,
+            card_level_min2_age8,
+            card_level_min2_age3,
+            card_level_min2_age2,
+            card_level0_age7,
+            card_level0_age6,
             card_level0_age5,
             card_level0_age4,
+            card_level0_age3,
             card_hidden_age1,
             card_level_min1_age1,
-            card_level_min3_age0,
+            card_level_min1_age2,
         ]
     
     prof = berenice.ProfessorBerenice(card_list,
-                                      date_mock=DateMock)
+                                      date_mock=DateMock,
+                                      max_cards_per_grade=2)
 
     current_card = prof.current_card
     assert current_card == card_level_min2_age8
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age3
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     current_card = prof.current_card
@@ -694,11 +874,19 @@ def test_several_cards():
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     current_card = prof.current_card
-    assert current_card == card_level0_age5
+    assert current_card == card_level_min1_age2
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age7
     prof.current_card_reply(answer="skip")
 
     current_card = prof.current_card
-    assert current_card == card_level0_age4
+    assert current_card == card_level0_age6
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age5
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     current_card = prof.current_card
@@ -711,14 +899,10 @@ def test_several_cards():
 
     current_card = prof.current_card
     assert current_card == card_level2_age12
-    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+    prof.current_card_reply(answer=WRONG_ANSWER_STR)
 
     current_card = prof.current_card
     assert current_card == card_level2_age11
-    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
-
-    current_card = prof.current_card
-    assert current_card == card_level2_age10
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     ###

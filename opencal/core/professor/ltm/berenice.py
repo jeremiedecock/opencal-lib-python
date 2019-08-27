@@ -10,9 +10,12 @@ GRADE_CARD_NEVER_REVIEWED = -1
 GRADE_CARD_WRONG_YESTERDAY = -2
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -3
 
+DEFAULT_MAX_CARDS_PER_GRADE = 5
+
 class ProfessorBerenice:
 
-    def __init__(self, card_list, date_mock=None):
+    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE):
+        self.max_cards_per_grade = max_cards_per_grade
         self._card_list_dict = {}
 
         if date_mock is None:
@@ -51,7 +54,7 @@ class ProfessorBerenice:
     @property
     def current_card(self):
         if self.current_sub_list is not None:
-            if len(self.current_sub_list) == 0: # TODO: or self.num_right_answer_current_grade >= NUM_CARDS_PER_GRADE
+            if len(self.current_sub_list) == 0 or self.num_right_answer_current_grade >= self.max_cards_per_grade:
                 self.switch_grade()
 
         return self.current_sub_list[0] if self.current_sub_list is not None else None

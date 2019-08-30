@@ -59,6 +59,69 @@ CARD_MADE_TODAY_WITH_TIME = {
         'answer': 'bar'
     }
 
+CARD_REVIEWED_TODAY_1 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+            'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE,
+                    "result": RIGHT_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_REVIEWED_TODAY_2 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=6),
+            'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=4),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=3),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE,
+                    "result": RIGHT_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
+CARD_REVIEWED_TODAY_3 = {
+            'cdate': BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
+            'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=4),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=3),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE,
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+            'tags': ['baz'],
+            'hidden': False,
+            'question': 'foo',
+            'answer': 'bar'
+        }
+
 CARD_MADE_YESTERDAY_WITH_TIME = {
         "cdate": datetime.datetime(year=1999, month=12, day=31, hour=23, minute=59),
         "reviews": [],
@@ -785,6 +848,64 @@ def test_max_cards_per_grade():
 
     current_card = prof.current_card
     assert current_card == card_level0_age4
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == None
+
+
+def test_init_right_answer_current_grade():
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+
+    Check that:
+    - right answers made today in a previous training session are counted in `self.num_right_answer_current_grade` (i.e. when the opencal executable has been called several time the same day) ;
+    - `professor.current_card` returns the expected cards ;
+    - no more than `max_cards_per_grade` cards are reviewed ;
+    - `professor.current_card` returns `None` when there are no more cards to
+      review.
+    """
+    card_reviewed_today_right_age6 = copy.deepcopy(CARD_REVIEWED_TODAY_2)
+    card_reviewed_today_wrong_age5 = copy.deepcopy(CARD_REVIEWED_TODAY_3)
+    card_reviewed_today_right_age1 = copy.deepcopy(CARD_REVIEWED_TODAY_1)
+    card_level0_age8 = copy.deepcopy(CARD_BASIC_LEVEL0_6)
+    card_level0_age7 = copy.deepcopy(CARD_BASIC_LEVEL0_5)
+    card_level0_age6 = copy.deepcopy(CARD_BASIC_LEVEL0_3)
+    card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
+    card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+    card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
+
+    card_list = [
+            card_reviewed_today_right_age6,
+            card_reviewed_today_wrong_age5,
+            card_reviewed_today_right_age1,
+            card_level0_age8,
+            card_level0_age7,
+            card_level0_age6,
+            card_level0_age5,
+            card_level0_age4,
+            card_level0_age3,
+        ]
+    
+    prof = berenice.ProfessorBerenice(card_list,
+                                      date_mock=DateMock,
+                                      max_cards_per_grade=4)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age8
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age7
+    prof.current_card_reply(answer="skip")
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age6
+    prof.current_card_reply(answer=WRONG_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level0_age5
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     ###

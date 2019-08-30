@@ -24,6 +24,19 @@ Note:
     This project is still in beta stage, so the API is not finalized yet.
 
 
+Scientific references
+=====================
+
+Stanislas Dehaene (in french):
+
+- https://www.college-de-france.fr/site/stanislas-dehaene/course-2015-02-17-09h30.htm (cours au Collège de France): very interesting references, e.g.:
+
+  - Kang, S. H. K., Lindsey, R. V., Mozer, M. C., & Pashler, H. (2014). *Retrieval practice over the long term: should spacing be expanding or equal‐interval?* Psychonomic Bulletin & Review, 21(6), 1544–1550
+
+- https://www.franceculture.fr/emissions/la-conversation-scientifique/apprendre-est-ce-que-cela-peut-sapprendre
+- https://www.franceculture.fr/sciences/trois-conseils-pour-ameliorer-votre-memoire-par-stanislas-dehaene, https://www.youtube.com/watch?v=MMvzA5SfBGk and https://www.youtube.com/watch?v=-Fnwc_ORZFM (very short article and videos)
+
+
 Dependencies
 ============
 

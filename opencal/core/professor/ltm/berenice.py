@@ -9,6 +9,7 @@ from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 GRADE_CARD_NEVER_REVIEWED = -1
 GRADE_CARD_WRONG_YESTERDAY = -2
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -3
+GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER = -4
 
 DEFAULT_MAX_CARDS_PER_GRADE = 5
 
@@ -17,6 +18,7 @@ class ProfessorBerenice:
     def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE):
         self.max_cards_per_grade = max_cards_per_grade
         self._card_list_dict = {}
+        self.num_right_answers_per_grade = {}
 
         if date_mock is None:
             self._date = datetime.date
@@ -28,10 +30,22 @@ class ProfessorBerenice:
                 grade = assess(card, date_mock=date_mock)
                 card["grade"] = grade
 
-                if grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
+                if grade == GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER:
+
+                    grade_without_today_answers = assess(card, date_mock=date_mock, ignore_today_answers=True)
+
+                    if grade_without_today_answers not in self.num_right_answers_per_grade:
+                        self.num_right_answers_per_grade[grade_without_today_answers] = 0
+                    self.num_right_answers_per_grade[grade_without_today_answers] += 1
+
+                elif grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
+
                     if grade not in self._card_list_dict:
                         self._card_list_dict[grade] = []
                     self._card_list_dict[grade].append(card)
+
+                    if grade not in self.num_right_answers_per_grade:
+                        self.num_right_answers_per_grade[grade] = 0
 
         self.switch_grade()
 
@@ -48,13 +62,22 @@ class ProfessorBerenice:
             self.current_grade = None
             self.current_sub_list = None
 
-        self.num_right_answer_current_grade = 0
-
 
     @property
     def current_card(self):
         if self.current_sub_list is not None:
-            if len(self.current_sub_list) == 0 or self.num_right_answer_current_grade >= self.max_cards_per_grade:
+            if self.current_grade in (0, GRADE_CARD_NEVER_REVIEWED, GRADE_CARD_WRONG_YESTERDAY):
+                num_right_answers = 0
+                if 0 in self.num_right_answers_per_grade:
+                    num_right_answers += self.num_right_answers_per_grade[0]
+                if GRADE_CARD_NEVER_REVIEWED in self.num_right_answers_per_grade:
+                    num_right_answers += self.num_right_answers_per_grade[GRADE_CARD_NEVER_REVIEWED]
+                if GRADE_CARD_WRONG_YESTERDAY in self.num_right_answers_per_grade:
+                    num_right_answers += self.num_right_answers_per_grade[GRADE_CARD_WRONG_YESTERDAY]
+            else:
+                num_right_answers = self.num_right_answers_per_grade[self.current_grade]
+
+            if len(self.current_sub_list) == 0 or num_right_answers >= self.max_cards_per_grade:
                 self.switch_grade()
 
         return self.current_sub_list[0] if self.current_sub_list is not None else None
@@ -70,7 +93,7 @@ class ProfessorBerenice:
                     "result": RIGHT_ANSWER_STR
                 }
                 card["reviews"].append(review)
-                self.num_right_answer_current_grade += 1
+                self.num_right_answers_per_grade[self.current_grade] += 1
             elif answer == WRONG_ANSWER_STR:
                 review = {
                     "rdate": self._date.today(),
@@ -96,7 +119,7 @@ def datetime_to_date(d):
     return d
 
 
-def assess(card, date_mock=None):
+def assess(card, date_mock=None, ignore_today_answers=False):
     grade = 0
 
     cdate = datetime_to_date(card["cdate"])
@@ -106,11 +129,15 @@ def assess(card, date_mock=None):
     else:
         today = date_mock.today()
 
-    if "reviews" in card.keys() and len(card["reviews"]) > 0:
-        # There is at least one review
+    if "reviews" in card.keys():
+        if ignore_today_answers:
+            review_list = [review for review in card["reviews"] if review["rdate"] < today]
+        else:
+            review_list = card["reviews"]
+    else:
+        review_list = []
 
-        review_list = card["reviews"]
-
+    if len(review_list) > 0:
         # Reviews are supposed to be sorted!
         assert all(review_list[i]["rdate"] <= review_list[i+1]["rdate"] for i in range(len(review_list)-1))
         #review_list.sort(key=lambda x: x["rdate"])
@@ -118,8 +145,11 @@ def assess(card, date_mock=None):
         yesterday = today - datetime.timedelta(days=1)
         last_review_result = review_list[-1]["result"]
         last_review_rdate = datetime_to_date(review_list[-1]["rdate"])
-        if last_review_result == WRONG_ANSWER_STR and last_review_rdate == yesterday:
+
+        if last_review_rdate == yesterday and last_review_result == WRONG_ANSWER_STR:
             grade = GRADE_CARD_WRONG_YESTERDAY
+        elif last_review_rdate == today and last_review_result == RIGHT_ANSWER_STR:
+            grade = GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER
         else:
             expected_revision_date = get_expected_revision_date(cdate, grade)
 

@@ -866,15 +866,19 @@ def test_init_right_answer_current_grade():
     - `professor.current_card` returns `None` when there are no more cards to
       review.
     """
-    card_reviewed_today_right_age6 = copy.deepcopy(CARD_REVIEWED_TODAY_2)
+    card_reviewed_today_right_age6 = copy.deepcopy(CARD_REVIEWED_TODAY_2)   # formerly level 0
     card_reviewed_today_wrong_age5 = copy.deepcopy(CARD_REVIEWED_TODAY_3)
-    card_reviewed_today_right_age1 = copy.deepcopy(CARD_REVIEWED_TODAY_1)
+    card_reviewed_today_right_age1 = copy.deepcopy(CARD_REVIEWED_TODAY_1)   # formerly level -1
+
     card_level0_age8 = copy.deepcopy(CARD_BASIC_LEVEL0_6)
     card_level0_age7 = copy.deepcopy(CARD_BASIC_LEVEL0_5)
     card_level0_age6 = copy.deepcopy(CARD_BASIC_LEVEL0_3)
     card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
     card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
+
+    assert berenice.assess(card_reviewed_today_right_age6, date_mock=DateMock, ignore_today_answers=True) == 0
+    assert berenice.assess(card_reviewed_today_right_age1, date_mock=DateMock, ignore_today_answers=True) == -1
 
     card_list = [
             card_reviewed_today_right_age6,
@@ -887,10 +891,14 @@ def test_init_right_answer_current_grade():
             card_level0_age4,
             card_level0_age3,
         ]
-    
+
     prof = berenice.ProfessorBerenice(card_list,
                                       date_mock=DateMock,
                                       max_cards_per_grade=4)
+
+    assert sorted(prof.num_right_answers_per_grade.keys()) == [-1, 0]
+    assert prof.num_right_answers_per_grade[-1] == 1
+    assert prof.num_right_answers_per_grade[0] == 1
 
     current_card = prof.current_card
     assert current_card == card_level0_age8
@@ -957,30 +965,30 @@ def test_several_cards():
     card_level2_age10 = copy.deepcopy(CARD_BASIC_LEVEL2_1)
 
     card_list = [
-            card_level2_age17,
-            card_level2_age12,
-            card_level2_age11,
-            card_level2_age10,
-            card_level1_age10,
+            card_hidden_age1,
             card_level_min3_age8,
             card_level_min3_age4,
             card_level_min3_age0,
             card_level_min2_age8,
             card_level_min2_age3,
             card_level_min2_age2,
+            card_level_min1_age1,
+            card_level_min1_age2,
             card_level0_age7,
             card_level0_age6,
             card_level0_age5,
             card_level0_age4,
             card_level0_age3,
-            card_hidden_age1,
-            card_level_min1_age1,
-            card_level_min1_age2,
+            card_level1_age10,
+            card_level2_age17,
+            card_level2_age12,
+            card_level2_age11,
+            card_level2_age10,
         ]
-    
+
     prof = berenice.ProfessorBerenice(card_list,
                                       date_mock=DateMock,
-                                      max_cards_per_grade=2)
+                                      max_cards_per_grade=3)
 
     current_card = prof.current_card
     assert current_card == card_level_min2_age8
@@ -988,7 +996,11 @@ def test_several_cards():
 
     current_card = prof.current_card
     assert current_card == card_level_min2_age3
-    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+    prof.current_card_reply(answer=WRONG_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age2
+    prof.current_card_reply(answer="skip")
 
     current_card = prof.current_card
     assert current_card == card_level_min1_age1
@@ -996,7 +1008,7 @@ def test_several_cards():
 
     current_card = prof.current_card
     assert current_card == card_level_min1_age2
-    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+    prof.current_card_reply(answer=WRONG_ANSWER_STR)
 
     current_card = prof.current_card
     assert current_card == card_level0_age7
@@ -1006,13 +1018,13 @@ def test_several_cards():
     assert current_card == card_level0_age6
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
-    current_card = prof.current_card
-    assert current_card == card_level0_age5
-    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+    ###
 
     current_card = prof.current_card
     assert current_card == card_level1_age10
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
 
     current_card = prof.current_card
     assert current_card == card_level2_age17
@@ -1020,7 +1032,7 @@ def test_several_cards():
 
     current_card = prof.current_card
     assert current_card == card_level2_age12
-    prof.current_card_reply(answer=WRONG_ANSWER_STR)
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     current_card = prof.current_card
     assert current_card == card_level2_age11

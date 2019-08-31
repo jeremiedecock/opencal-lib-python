@@ -15,8 +15,10 @@ DEFAULT_MAX_CARDS_PER_GRADE = 5
 
 class ProfessorBerenice:
 
-    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE):
+    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE, tag_priority_dict=None):
         self.max_cards_per_grade = max_cards_per_grade
+        self.tag_priority_dict = tag_priority_dict if tag_priority_dict is not None else {}
+
         self._card_list_dict = {}
         self.num_right_answers_per_grade = {}
 

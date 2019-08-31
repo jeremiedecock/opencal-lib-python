@@ -34,11 +34,18 @@ class ProfessorBerenice:
 
                     grade_without_today_answers = assess(card, date_mock=date_mock, ignore_today_answers=True)
 
+                    if grade_without_today_answers in (GRADE_CARD_NEVER_REVIEWED, GRADE_CARD_WRONG_YESTERDAY): 
+                        grade_without_today_answers = 0
+
                     if grade_without_today_answers not in self.num_right_answers_per_grade:
                         self.num_right_answers_per_grade[grade_without_today_answers] = 0
+
                     self.num_right_answers_per_grade[grade_without_today_answers] += 1
 
                 elif grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
+
+                    if grade in (GRADE_CARD_NEVER_REVIEWED, GRADE_CARD_WRONG_YESTERDAY): 
+                        grade = 0
 
                     if grade not in self._card_list_dict:
                         self._card_list_dict[grade] = []
@@ -66,18 +73,7 @@ class ProfessorBerenice:
     @property
     def current_card(self):
         if self.current_sub_list is not None:
-            if self.current_grade in (0, GRADE_CARD_NEVER_REVIEWED, GRADE_CARD_WRONG_YESTERDAY):
-                num_right_answers = 0
-                if 0 in self.num_right_answers_per_grade:
-                    num_right_answers += self.num_right_answers_per_grade[0]
-                if GRADE_CARD_NEVER_REVIEWED in self.num_right_answers_per_grade:
-                    num_right_answers += self.num_right_answers_per_grade[GRADE_CARD_NEVER_REVIEWED]
-                if GRADE_CARD_WRONG_YESTERDAY in self.num_right_answers_per_grade:
-                    num_right_answers += self.num_right_answers_per_grade[GRADE_CARD_WRONG_YESTERDAY]
-            else:
-                num_right_answers = self.num_right_answers_per_grade[self.current_grade]
-
-            if len(self.current_sub_list) == 0 or num_right_answers >= self.max_cards_per_grade:
+            if len(self.current_sub_list) == 0 or self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade:
                 self.switch_grade()
 
         return self.current_sub_list[0] if self.current_sub_list is not None else None

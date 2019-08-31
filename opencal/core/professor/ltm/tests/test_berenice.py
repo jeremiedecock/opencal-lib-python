@@ -896,9 +896,8 @@ def test_init_right_answer_current_grade():
                                       date_mock=DateMock,
                                       max_cards_per_grade=4)
 
-    assert sorted(prof.num_right_answers_per_grade.keys()) == [-1, 0]
-    assert prof.num_right_answers_per_grade[-1] == 1
-    assert prof.num_right_answers_per_grade[0] == 1
+    assert sorted(prof.num_right_answers_per_grade.keys()) == [0]
+    assert prof.num_right_answers_per_grade[0] == 2
 
     current_card = prof.current_card
     assert current_card == card_level0_age8
@@ -914,6 +913,132 @@ def test_init_right_answer_current_grade():
 
     current_card = prof.current_card
     assert current_card == card_level0_age5
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == None
+
+
+def test_switch_grade_min2():
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+
+    Check that:
+    - `professor.switch_grade` switch from level -2 to level 1 and from level -1 to level 1 ;
+    """
+    card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
+    card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)
+    card_level_min2_age2 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_2)
+
+    card_level_min1_age1 = copy.deepcopy(CARD_WITHOUT_REVIEW_1)
+    card_level_min1_age2 = copy.deepcopy(CARD_WITHOUT_REVIEW_2)
+    
+    card_level0_age7 = copy.deepcopy(CARD_BASIC_LEVEL0_5)
+    card_level0_age6 = copy.deepcopy(CARD_BASIC_LEVEL0_3)
+    card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
+    card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+    card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
+    
+    card_level1_age10 = copy.deepcopy(CARD_BASIC_LEVEL1_1)
+
+    card_list = [
+            card_level_min2_age8,
+            card_level_min2_age3,
+            card_level_min2_age2,
+            card_level_min1_age1,
+            card_level_min1_age2,
+            card_level0_age7,
+            card_level0_age6,
+            card_level0_age5,
+            card_level0_age4,
+            card_level0_age3,
+            card_level1_age10,
+        ]
+
+    prof = berenice.ProfessorBerenice(card_list,
+                                      date_mock=DateMock,
+                                      max_cards_per_grade=2)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age8
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age3
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == card_level1_age10
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == None
+
+
+def test_switch_grade_min1():
+    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+
+    Check that:
+    - `professor.switch_grade` switch from level -2 to level 1 and from level -1 to level 1 ;
+    """
+    card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
+    card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)
+    card_level_min2_age2 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_2)
+
+    card_level_min1_age1 = copy.deepcopy(CARD_WITHOUT_REVIEW_1)
+    card_level_min1_age2 = copy.deepcopy(CARD_WITHOUT_REVIEW_2)
+    
+    card_level0_age7 = copy.deepcopy(CARD_BASIC_LEVEL0_5)
+    card_level0_age6 = copy.deepcopy(CARD_BASIC_LEVEL0_3)
+    card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
+    card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
+    card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
+    
+    card_level1_age10 = copy.deepcopy(CARD_BASIC_LEVEL1_1)
+
+    card_list = [
+            card_level_min2_age8,
+            card_level_min2_age3,
+            card_level_min2_age2,
+            card_level_min1_age1,
+            card_level_min1_age2,
+            card_level0_age7,
+            card_level0_age6,
+            card_level0_age5,
+            card_level0_age4,
+            card_level0_age3,
+            card_level1_age10,
+        ]
+
+    prof = berenice.ProfessorBerenice(card_list,
+                                      date_mock=DateMock,
+                                      max_cards_per_grade=2)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age8
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age3
+    prof.current_card_reply(answer=WRONG_ANSWER_STR)
+
+    current_card = prof.current_card
+    assert current_card == card_level_min2_age2
+    prof.current_card_reply(answer="skip")
+
+    current_card = prof.current_card
+    assert current_card == card_level_min1_age1
+    prof.current_card_reply(answer=RIGHT_ANSWER_STR)
+
+    ###
+
+    current_card = prof.current_card
+    assert current_card == card_level1_age10
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     ###

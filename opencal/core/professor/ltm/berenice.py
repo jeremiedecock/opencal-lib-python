@@ -100,6 +100,8 @@ class ProfessorBerenice:
                 card["reviews"].append(review)
             elif answer == "skip":
                 pass
+            elif answer == "skip level":
+                self.current_sub_list = []
             else:
                 raise ValueError("Unknown answer : {}".format(answer))
 

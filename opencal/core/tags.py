@@ -43,4 +43,4 @@ def tag_graph(card_list, count_hidden_cards=False):
 
                     tag_dict[pair] += 1
 
-    return tag_dict
+    return {tuple(sorted(k)): v for k,v in tag_dict.items()}

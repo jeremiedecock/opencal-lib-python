@@ -10,7 +10,7 @@ from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 class ProfessorRandy:
 
     def __init__(self, card_list):
-        self._card_list = [card for card in card_list if not card["hidden"]]
+        self.update_card_list(card_list)
 
         # Shuffle list `self._card_list` in place and return None
         random.shuffle(self._card_list)
@@ -31,3 +31,6 @@ class ProfessorRandy:
                 self._card_list.append(card)
             else:
                 raise ValueError("Unknown answer : {}".format(answer))
+
+    def update_card_list(self, card_list):
+        self._card_list = [card for card in card_list if not card["hidden"]]

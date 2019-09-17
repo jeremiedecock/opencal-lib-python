@@ -16,7 +16,12 @@ def tag_dict(card_list, count_hidden_cards=False):
 
 
 def tag_list(card_list, count_hidden_cards=False, sort="desc"):
-    reverse = True if "desc" else False
+    reverse = True if sort == "desc" else False
+    return sorted(tag_dict(card_list, count_hidden_cards).keys(), reverse=reverse)
+
+
+def tag_list_count(card_list, count_hidden_cards=False, sort="desc"):
+    reverse = True if sort == "desc" else False
     return sorted(tag_dict(card_list, count_hidden_cards).items(), key=lambda item: item[1], reverse=reverse)
 
 

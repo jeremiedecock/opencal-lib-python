@@ -8,7 +8,6 @@ class ProfessorRalph:
 
     def __init__(self, card_list):
         self.update_card_list(card_list)
-        self.update_card()
 
     def update_card(self):
         if len(self._card_list) > 0:
@@ -26,3 +25,4 @@ class ProfessorRalph:
 
     def update_card_list(self, card_list):
         self._card_list = [card for card in card_list if not card["hidden"]]
+        self.update_card()

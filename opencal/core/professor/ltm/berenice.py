@@ -51,7 +51,6 @@ class ProfessorBerenice:
 
                     if grade_without_today_answers not in self.num_right_answers_per_grade:
                         self.num_right_answers_per_grade[grade_without_today_answers] = 0
-
                     self.num_right_answers_per_grade[grade_without_today_answers] += card["difficulty"]
 
                 elif grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
@@ -66,10 +65,25 @@ class ProfessorBerenice:
                     if grade not in self.num_right_answers_per_grade:
                         self.num_right_answers_per_grade[grade] = 0
 
+        # Another special rule for level 0
+        if 0 in self._card_list_dict:
+            # Sort level 0 cards by descending date
+            self._card_list_dict[0].sort(key=lambda item: item["cdate"], reverse=True)
+
+            # Sort level 0 cards by ascending (actual) grade : GRADE_CARD_WRONG_YESTERDAY < GRADE_CARD_NEVER_REVIEWED < GRADE 0
+            self._card_list_dict[0].sort(key=lambda item: item["grade"])
+
         self.switch_grade()
 
 
     def switch_grade(self):
+        # TODO: smelly code...
+        self._switch_grade()
+
+        while (self.current_grade is not None) and (self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade):
+            self._switch_grade()
+
+    def _switch_grade(self):
         if len(self._card_list_dict.keys()) > 0:
             self.current_grade = sorted(self._card_list_dict.keys())[0]
             self.current_sub_list = self._card_list_dict.pop(self.current_grade)  # rem: this remove current_grade from _card_list_dict
@@ -88,7 +102,9 @@ class ProfessorBerenice:
     @property
     def current_card(self):
         if VERBOSE:
-            print(self.num_right_answers_per_grade)
+            for k, v in sorted(self.num_right_answers_per_grade.items(), key=lambda item: item[0]):
+                print("{}: {}".format(k, v))
+            print("---")
 
         if self.current_sub_list is not None:
             if len(self.current_sub_list) == 0 or self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade:

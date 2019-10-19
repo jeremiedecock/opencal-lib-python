@@ -103,7 +103,11 @@ class ProfessorBerenice:
     def current_card(self):
         if VERBOSE:
             for k, v in sorted(self.num_right_answers_per_grade.items(), key=lambda item: item[0]):
-                print("{}: {}".format(k, v))
+                if k == self.current_grade:
+                    num_cards  = len(self.current_sub_list)
+                else:
+                    num_cards = len(self._card_list_dict.get(k, []))
+                print("{}: {} / {} ({})".format(k, v, self.max_cards_per_grade, num_cards if num_cards > 0 else '-'))
             print("---")
 
         if self.current_sub_list is not None:

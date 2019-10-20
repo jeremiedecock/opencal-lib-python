@@ -13,6 +13,9 @@ GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER = -4
 
 DEFAULT_MAX_CARDS_PER_GRADE = 5
 
+DEFAULT_PRIORITY = 1.
+DEFAULT_DIFFICULTY = 1.
+
 VERBOSE = True
 
 class ProfessorBerenice:
@@ -29,6 +32,7 @@ class ProfessorBerenice:
 
         self._card_list_dict = {}
         self.num_right_answers_per_grade = {}
+        self.num_wrong_answers = 0             # TODO: BUG -> doesn't take into account wrong answers from previous executions...
 
         if date_mock is None:
             self._date = datetime.date
@@ -83,6 +87,7 @@ class ProfessorBerenice:
         while (self.current_grade is not None) and (self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade):
             self._switch_grade()
 
+
     def _switch_grade(self):
         if len(self._card_list_dict.keys()) > 0:
             self.current_grade = sorted(self._card_list_dict.keys())[0]
@@ -93,7 +98,7 @@ class ProfessorBerenice:
                 card["priority"] = estimate_card_priority(card, self.tag_priority_dict)
 
             # Sort current_sub_list according to the priority level of each card
-            self.current_sub_list.sort(key=lambda _card : _card["priority"])
+            self.current_sub_list.sort(key=lambda _card : _card["priority"], reverse=True)
         else:
             self.current_grade = None
             self.current_sub_list = None
@@ -107,7 +112,8 @@ class ProfessorBerenice:
                     num_cards  = len(self.current_sub_list)
                 else:
                     num_cards = len(self._card_list_dict.get(k, []))
-                print("{}: {} / {} ({})".format(k, v, self.max_cards_per_grade, num_cards if num_cards > 0 else '-'))
+                print("{}: {:0.1f} / {} ({})".format(k, v, self.max_cards_per_grade, num_cards if num_cards > 0 else '-'))
+            print("Number of wrong answers:", self.num_wrong_answers)
             print("---")
 
         if self.current_sub_list is not None:
@@ -134,6 +140,7 @@ class ProfessorBerenice:
                     "result": WRONG_ANSWER_STR
                 }
                 card["reviews"].append(review)
+                self.num_wrong_answers += 1
             elif answer == "skip":
                 pass
             elif answer == "skip level":
@@ -230,21 +237,32 @@ def delta_days(grade):
 
 
 def estimate_card_priority(card, tag_priority_dict):
-    card_priority = 0    # The default difficulty value is zero
-
     # TODO: estimate the priority of each card... -> utilise deux liste de liste tags definie dans le fichier de config .yaml :$
     # prof_berenice_high_priority_tags = [['maths', 'algebre', ...], ['accenta'], ['important', 'high priority', ...], ...] ;
     # prof_berebice_low_priority_tags = [[...], ...] -> chaque sous liste est un ensemble de tags équivalant ;
     # chaque tag ds high priority => card priority += 1 ; chaque tag dans low_prio_list => card priority -= 1
 
+    tag_priority_list = [tag_priority_dict.get(tag, DEFAULT_PRIORITY) for tag in card["tags"]]
+
+    if len(tag_priority_list) == 0:
+        card_priority = DEFAULT_PRIORITY
+    else:
+        if min(tag_priority_list) < 0:
+            card_priority = min(tag_priority_list)
+        else:
+            card_priority = max(tag_priority_list) # Each tag = one priority value => take the max
+
     return card_priority
 
 
 def estimate_card_difficulty(card, tag_difficulty_dict):
-    card_difficulty = 1    # The default difficulty value is one
-
     # TODO: tags (+ maybe rate of right answer and avg response time)
-    # each tag = one difficulty value => take the max
+
+    tag_difficulty_list = [tag_difficulty_dict.get(tag, DEFAULT_DIFFICULTY) for tag in card["tags"]]
+
+    if len(tag_difficulty_list) == 0:
+        card_difficulty = DEFAULT_DIFFICULTY
+    else:
+        card_difficulty = max(tag_difficulty_list) # Each tag = one difficulty value => take the max
 
     return card_difficulty
-

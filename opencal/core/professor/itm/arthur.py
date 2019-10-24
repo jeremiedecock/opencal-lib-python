@@ -83,7 +83,7 @@ class ProfessorArthur:
 
 
     def update_card_list(self, card_list):
-        self._full_card_set = [card for card in card_list if not card["hidden"]]
+        self._full_card_set = {card for card in card_list if not card["hidden"]}
 
         # Init cards
         for card in self._full_card_set:

@@ -20,7 +20,7 @@ VERBOSE = True
 
 class ProfessorBerenice:
 
-    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE, tag_priority_dict=None, tag_difficulty_dict=None):
+    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE, tag_priority_dict=None, tag_difficulty_dict=None, reverse_level_0=False):
         self.max_cards_per_grade = max_cards_per_grade
         self.tag_priority_dict = tag_priority_dict if tag_priority_dict is not None else {}
         self.tag_difficulty_dict = tag_difficulty_dict if tag_difficulty_dict is not None else {}
@@ -72,7 +72,8 @@ class ProfessorBerenice:
         # Another special rule for level 0
         if 0 in self._card_list_dict:
             # Sort level 0 cards by descending date
-            self._card_list_dict[0].sort(key=lambda item: item["cdate"], reverse=True)
+            if reverse_level_0:
+                self._card_list_dict[0].sort(key=lambda item: item["cdate"], reverse=True)
 
             # Sort level 0 cards by ascending (actual) grade : GRADE_CARD_WRONG_YESTERDAY < GRADE_CARD_NEVER_REVIEWED < GRADE 0
             self._card_list_dict[0].sort(key=lambda item: item["grade"])

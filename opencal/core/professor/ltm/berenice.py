@@ -26,6 +26,7 @@ class ProfessorBerenice:
         self.tag_difficulty_dict = tag_difficulty_dict if tag_difficulty_dict is not None else {}
 
         if VERBOSE:
+            print("Professor Berenice")
             print("max_cards_per_grade =", self.max_cards_per_grade)
             print("tag_priority_dict =", self.tag_priority_dict)
             print("tag_difficulty_dict =", self.tag_difficulty_dict)

@@ -259,7 +259,11 @@ def estimate_card_priority(card, tag_priority_dict):
 def estimate_card_difficulty(card, tag_difficulty_dict):
     # TODO: tags (+ maybe rate of right answer and avg response time)
 
-    tag_difficulty_list = [tag_difficulty_dict.get(tag, DEFAULT_DIFFICULTY) for tag in card["tags"]]
+    tag_difficulty_list = []
+
+    for tag in card["tags"]:
+        if tag in tag_difficulty_dict:
+            tag_difficulty_list.append(tag_difficulty_dict[tag])
 
     if len(tag_difficulty_list) == 0:
         card_difficulty = DEFAULT_DIFFICULTY

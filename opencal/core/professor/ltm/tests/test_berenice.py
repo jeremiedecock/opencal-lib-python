@@ -416,10 +416,10 @@ CARD_IGNORE_PREMATURE_BAD_REVIEWS = {
     }
 
 CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY = {
-        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=3),
         "reviews": [
             {
-                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
+                "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
                 "result": RIGHT_ANSWER_STR
             },
             {
@@ -998,7 +998,7 @@ def test_init_right_answer_current_grade():
     card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
 
     assert berenice.assess(card_reviewed_today_right_age6, date_mock=DateMock, ignore_today_answers=True) == 0
-    assert berenice.assess(card_reviewed_today_right_age1, date_mock=DateMock, ignore_today_answers=True) == -1
+    assert berenice.assess(card_reviewed_today_right_age1, date_mock=DateMock, ignore_today_answers=True) == berenice.GRADE_CARD_NEVER_REVIEWED
 
     card_list = [
             card_reviewed_today_right_age6,
@@ -1045,7 +1045,7 @@ def test_switch_grade_min2():
     """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
-    - `professor.switch_grade` switch from level -2 to level 1 and from level -1 to level 1 ;
+    - `professor.switch_grade` switch from level -2 to level 1 and from level GRADE_CARD_NEVER_REVIEWED to level 1 ;
     """
     card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
     card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)

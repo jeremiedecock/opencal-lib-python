@@ -620,6 +620,126 @@ def test_card_wrong_review_today():
 
 
 ###############################################################################
+# TEST THE "estimate_card_difficulty" FUNCTION                                #
+###############################################################################
+
+TAG_EASY = "easy"
+TAG_NEUTRAL = "normal"
+TAG_DIFFICULT = "difficult"
+
+POINTS_EASY = 0.5
+POINTS_NEUTRAL = 1
+POINTS_DIFFICULT = 2
+
+CARD_DIFFICULTY_NONE = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_EASY = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_EASY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_NEUTRAL = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_NEUTRAL],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_DIFFICULT = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_DIFFICULT],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_EASY_NEUTRAL = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_EASY, TAG_NEUTRAL],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_NEUTRAL_EASY = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_NEUTRAL, TAG_EASY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_EASY_DIFFICULT = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_EASY, TAG_DIFFICULT],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_DIFFICULT_EASY = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_DIFFICULT, TAG_EASY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_DIFFICULT_NEUTRAL = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_DIFFICULT, TAG_NEUTRAL],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DIFFICULTY_NEUTRAL_DIFFICULT = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_NEUTRAL, TAG_DIFFICULT],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+def test_estimate_card_difficulty():
+    tag_difficulty_dict = {
+            TAG_EASY: POINTS_EASY,
+            TAG_DIFFICULT: POINTS_DIFFICULT
+        }
+
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NONE, tag_difficulty_dict) == POINTS_NEUTRAL
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_EASY, tag_difficulty_dict) == POINTS_EASY
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL, tag_difficulty_dict) == POINTS_NEUTRAL
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_EASY_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT_EASY, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT_NEUTRAL, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
+    #assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_EASY_NEUTRAL, tag_difficulty_dict) == POINTS_EASY
+    #assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_EASY, tag_difficulty_dict) == POINTS_EASY
+
+
+###############################################################################
 # TEST THE PROFESSOR'S CONSTRUCTOR,                                           #
 # PLUS THE "current_card" AND "current_card_reply" METHODS                    #
 ###############################################################################

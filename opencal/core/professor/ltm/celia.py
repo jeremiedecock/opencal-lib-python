@@ -6,6 +6,7 @@ et que les cartes de niveau 0 sont triés par mise à jours la plus récente : m
 import copy
 import datetime
 import math
+import warnings
 
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
@@ -21,12 +22,20 @@ VERBOSE = True
 
 class ProfessorCelia:
 
-    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE, tag_priority_dict=None, tag_difficulty_dict=None, reverse_level_0=False):
+    def __init__(self,
+                 card_list,
+                 date_mock=None,
+                 max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE,
+                 tag_priority_dict=None,
+                 tag_difficulty_dict=None,
+                 reverse_level_0=False):
+
         self.max_cards_per_grade = max_cards_per_grade
         self.tag_priority_dict = tag_priority_dict if tag_priority_dict is not None else {}
         self.tag_difficulty_dict = tag_difficulty_dict if tag_difficulty_dict is not None else {}
 
         if VERBOSE:
+            print("Professor Celia")
             print("max_cards_per_grade =", self.max_cards_per_grade)
             print("tag_priority_dict =", self.tag_priority_dict)
             print("tag_difficulty_dict =", self.tag_difficulty_dict)
@@ -35,18 +44,28 @@ class ProfessorCelia:
         self.num_right_answers_per_grade = {}
         self.num_wrong_answers = 0             # TODO: BUG -> doesn't take into account wrong answers from previous executions...
 
+        # Défini la date actuelle qui peut être soit la vraie date actuelle soit un mock
         if date_mock is None:
             self._date = datetime.date
         else:
             self._date = date_mock
 
+        # Set card's grade and card's difficulty
+        # Initialize and update self.num_right_answers_per_grade
+        # Initialize and update self._card_list_dict
         for card in card_list:
             if not card["hidden"]:
+                # Set card's grade
                 grade = assess(card, date_mock=date_mock)
                 card["grade"] = grade
 
+                # Estimate the priority of each card
+                card["priority"] = estimate_card_priority(card, self.tag_priority_dict)
+
+                # Set card's difficulty
                 card["difficulty"] = estimate_card_difficulty(card, self.tag_difficulty_dict)
 
+                # Initialize and update self.num_right_answers_per_grade
                 if grade == GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER:
 
                     grade_without_today_answers = assess(card, date_mock=date_mock, ignore_today_answers=True)
@@ -57,22 +76,14 @@ class ProfessorCelia:
 
                 elif grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
 
+                    # Initialize and update self._card_list_dict
                     if grade not in self._card_list_dict:
                         self._card_list_dict[grade] = []
                     self._card_list_dict[grade].append(card)
 
+                    # Initialize self.num_right_answers_per_grade
                     if grade not in self.num_right_answers_per_grade:
                         self.num_right_answers_per_grade[grade] = 0
-
-        # A special rule for level 0
-        if 0 in self._card_list_dict:
-            # Sort level 0 cards by descending date
-            pass
-#            if reverse_level_0:
-#                self._card_list_dict[0].sort(key=lambda item: item["cdate"], reverse=True)
-#
-#            # Sort level 0 cards by ascending (actual) grade : GRADE_CARD_WRONG_YESTERDAY < GRADE_CARD_NEVER_REVIEWED < GRADE 0
-#            self._card_list_dict[0].sort(key=lambda item: item["grade"])
 
         self.switch_grade()
 
@@ -86,16 +97,12 @@ class ProfessorCelia:
 
 
     def _switch_grade(self):
-        if len(self._card_list_dict.keys()) > 0:
+        if len(self._card_list_dict) > 0:
             self.current_grade = sorted(self._card_list_dict.keys())[0]
             self.current_sub_list = self._card_list_dict.pop(self.current_grade)  # rem: this remove current_grade from _card_list_dict
 
-            # Estimate the priority of each card
-            for card in self.current_sub_list:
-                card["priority"] = estimate_card_priority(card, self.tag_priority_dict)
-
-            # Sort current_sub_list according to the priority level of each card
-            self.current_sub_list.sort(key=lambda _card : _card["priority"], reverse=True)
+            # Sort the current sub_list
+            sort_sub_list(self.current_sub_list, self.current_grade, self.tag_priority_dict)
         else:
             self.current_grade = None
             self.current_sub_list = None
@@ -104,20 +111,26 @@ class ProfessorCelia:
     @property
     def current_card(self):
         if VERBOSE:
-            for k, v in sorted(self.num_right_answers_per_grade.items(), key=lambda item: item[0]):
-                if k == self.current_grade:
-                    num_cards  = len(self.current_sub_list)
-                else:
-                    num_cards = len(self._card_list_dict.get(k, []))
-                print("{}: {:0.1f} / {} ({})".format(k, v, self.max_cards_per_grade, num_cards if num_cards > 0 else '-'))
-            print("Number of wrong answers:", self.num_wrong_answers)
-            print("---")
+            self.print_number_of_cards_to_review_per_grade()
 
+        # Switch to the next grade if the card sub list of the current grade is empty
+        # or if the current grade's quotas has been reached
         if self.current_sub_list is not None:
             if len(self.current_sub_list) == 0 or self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade:
                 self.switch_grade()
 
         return self.current_sub_list[0] if self.current_sub_list is not None else None
+
+
+    def print_number_of_cards_to_review_per_grade(self):
+        for k, v in sorted(self.num_right_answers_per_grade.items(), key=lambda item: item[0]):
+            if k == self.current_grade:
+                num_cards  = len(self.current_sub_list)
+            else:
+                num_cards = len(self._card_list_dict.get(k, []))
+            print("{}: {:0.1f} / {} ({})".format(k, v, self.max_cards_per_grade, num_cards if num_cards > 0 else '-'))
+        print("Number of wrong answers:", self.num_wrong_answers)
+        print("---")
 
 
     def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
@@ -203,6 +216,8 @@ def assess(card, date_mock=None, ignore_today_answers=False):
                     else:
                         grade = 0
                         expected_revision_date = get_expected_revision_date(rdate, grade)
+                else:
+                    warnings.warn("A card have a 'rdate' defined with a future date.")
 
             if expected_revision_date > today:            # "today before expected_revision_date"
                 # It's too early to review this card. The card will be hide
@@ -263,4 +278,22 @@ def estimate_card_difficulty(card, tag_difficulty_dict):
         card_difficulty = max(tag_difficulty_list) # Each tag = one difficulty value => take the max
 
     return card_difficulty
-    
+
+
+def sort_sub_list(sub_list, sub_list_grade, tag_priority_dict):
+    """Une "sub_list" est un liste de cartes où toutes les cartes ont le même "grade"
+
+    mis dans une fonction à part pour pouvoir être testé plus facilement dans des tests unitaires
+    """
+    if sub_list_grade == 0:
+        # Sort level 2 (minor sort level i.e. to sort cards having the same "last update date"):
+        # Sort current_sub_list according to the priority level of each card
+        sub_list.sort(key=lambda _card : _card["priority"], reverse=True)
+
+        # Sort level 1 (major sort level):
+        # Apply some special rules for cards having a grade equals to 0
+        # Sort level 0 cards by descending date
+        sub_list.sort(key=lambda _card : max([_card["cdate"]] + [review["rdate"] for review in _card["reviews"]]), reverse=True)
+    else:
+        # Sort current_sub_list according to the priority level of each card
+        sub_list.sort(key=lambda _card : _card["priority"], reverse=True)

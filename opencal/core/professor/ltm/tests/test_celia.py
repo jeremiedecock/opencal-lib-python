@@ -609,7 +609,8 @@ def test_ignore_premature_bad_reviews_yesterday():
     assert celia.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == 0
 
 def test_ignore_future_reviews():
-    assert celia.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
+    with pytest.warns(UserWarning):
+        assert celia.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
 
 def test_card_wrong_review_yesterday():
     assert celia.assess(CARD_WRONG_REVIEW_YESTERDAY_1, DateMock) == 0
@@ -737,6 +738,155 @@ def test_estimate_card_difficulty():
     assert celia.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
     #assert celia.estimate_card_difficulty(CARD_DIFFICULTY_EASY_NEUTRAL, tag_difficulty_dict) == POINTS_EASY
     #assert celia.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_EASY, tag_difficulty_dict) == POINTS_EASY
+
+
+###############################################################################
+# TEST THE "sort_sub_list" FUNCTION                                           #
+###############################################################################
+
+TAG_LOW_PRIORITY = "low priority"
+TAG_DEFAULT_PRIORITY = "default priority"
+TAG_HIGH_PRIORITY = "high priority"
+
+POINTS_LOW_PRIORITY = -1
+POINTS_DEFAULT_PRIORITY = 0
+POINTS_HIGH_PRIORITY = 1
+
+CARD_LOW_PRIORITY_C0 = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_LOW_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DEFAULT_PRIORITY_C0 = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_DEFAULT_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_HIGH_PRIORITY_C0 = {
+        "cdate": BOGUS_CURRENT_DATE,
+        "reviews": [],
+        'tags': [TAG_HIGH_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_HIGH_PRIORITY_C1 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
+        "reviews": [],
+        'tags': [TAG_HIGH_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DEFAULT_PRIORITY_C2 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+        "reviews": [],
+        'tags': [TAG_DEFAULT_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_HIGH_PRIORITY_C10_R5 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
+        'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+        'tags': [TAG_HIGH_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_LOW_PRIORITY_C15_R2 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=15),
+        'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=12),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+        'tags': [TAG_LOW_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+CARD_DEFAULT_PRIORITY_C9_R6 = {
+        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
+        'reviews': [
+                {
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
+                    "result": WRONG_ANSWER_STR
+                },{
+                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=6),
+                    "result": WRONG_ANSWER_STR
+                }
+            ],
+        'tags': [TAG_DEFAULT_PRIORITY],
+        'hidden': False,
+        'question': 'foo',
+        'answer': 'bar'
+    }
+
+def test_sort_sub_list():
+    tag_priority_dict = {
+            TAG_LOW_PRIORITY: POINTS_LOW_PRIORITY,
+            TAG_DEFAULT_PRIORITY: POINTS_DEFAULT_PRIORITY,
+            TAG_HIGH_PRIORITY: POINTS_HIGH_PRIORITY
+        }
+
+    # Estimate the priority of each card
+    for card in [CARD_LOW_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_HIGH_PRIORITY_C0,
+                 CARD_HIGH_PRIORITY_C1, CARD_DEFAULT_PRIORITY_C2,
+                 CARD_HIGH_PRIORITY_C10_R5, CARD_LOW_PRIORITY_C15_R2, CARD_DEFAULT_PRIORITY_C9_R6]:
+        card["priority"] = celia.estimate_card_priority(card, tag_priority_dict)
+    
+    # Check that no exception is raised when sub_list is empty
+    celia.sort_sub_list(sub_list=[], sub_list_grade=0, tag_priority_dict=tag_priority_dict)
+
+    # Test that card are sorted by descending priority level when sub_list_grade is not zero
+    sub_list = [CARD_LOW_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_HIGH_PRIORITY_C0]
+    sub_list_grade = 1
+    celia.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict)
+    assert sub_list == [CARD_HIGH_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_LOW_PRIORITY_C0]
+
+    # Test that card are sorted by last update (and by priority when cards have the same last update) when sub_list_grade is zero
+    sub_list = [CARD_DEFAULT_PRIORITY_C0, CARD_LOW_PRIORITY_C0, CARD_HIGH_PRIORITY_C0]
+    sub_list_grade = 0
+    celia.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict)
+    assert sub_list == [CARD_HIGH_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_LOW_PRIORITY_C0]
+
+    # Test that card are sorted by last update when sub_list_grade is zero
+    sub_list = [CARD_LOW_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C2, CARD_HIGH_PRIORITY_C1]
+    sub_list_grade = 0
+    celia.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict)
+    assert sub_list == [CARD_LOW_PRIORITY_C0, CARD_HIGH_PRIORITY_C1, CARD_DEFAULT_PRIORITY_C2]
+
+    # Test that card are sorted by last update when sub_list_grade is zero
+    sub_list = [CARD_HIGH_PRIORITY_C10_R5, CARD_LOW_PRIORITY_C15_R2, CARD_DEFAULT_PRIORITY_C9_R6]
+    sub_list_grade = 0
+    celia.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict)
+    assert sub_list == [CARD_LOW_PRIORITY_C15_R2, CARD_HIGH_PRIORITY_C10_R5, CARD_DEFAULT_PRIORITY_C9_R6]
 
 
 ###############################################################################
@@ -921,7 +1071,7 @@ def test_three_cards_two_hidden():
     assert current_card == None
 
 
-def test_max_cards_per_grade():
+def test_max_cards_per_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to be consistent with Celia's policy with grade 0
     """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
@@ -967,7 +1117,7 @@ def test_max_cards_per_grade():
     prof.current_card_reply(answer=WRONG_ANSWER_STR)
 
     current_card = prof.current_card
-    assert current_card == card_level0_age4
+    assert current_card == card_level0_age3
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     ###
@@ -976,7 +1126,7 @@ def test_max_cards_per_grade():
     assert current_card == None
 
 
-def test_init_right_answer_current_grade():
+def test_init_right_answer_current_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to be consistent with Celia's policy with grade 0
     """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
@@ -1231,9 +1381,10 @@ def test_several_cards():
             card_level2_age10,
         ]
 
-    prof = celia.ProfessorCelia(card_list,
-                                      date_mock=DateMock,
-                                      max_cards_per_grade=3)
+    with pytest.warns(UserWarning):  # 'card_level2_age12' raises a UserWarning as it consains a rdate defined in the future
+        prof = celia.ProfessorCelia(card_list,
+                                    date_mock=DateMock,
+                                    max_cards_per_grade=3)
 
     current_card = prof.current_card
     assert current_card == card_level_min2_age8

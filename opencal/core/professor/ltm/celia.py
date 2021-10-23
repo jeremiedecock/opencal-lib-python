@@ -8,6 +8,7 @@ import datetime
 import math
 import warnings
 
+from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -1
@@ -20,7 +21,7 @@ DEFAULT_DIFFICULTY = 1.
 
 VERBOSE = True
 
-class ProfessorCelia:
+class ProfessorCelia(AbstractProfessor):
 
     def __init__(self,
                  card_list,
@@ -29,6 +30,7 @@ class ProfessorCelia:
                  tag_priority_dict=None,
                  tag_difficulty_dict=None,
                  reverse_level_0=False):
+        super().__init__()
 
         self.max_cards_per_grade = max_cards_per_grade
         self.tag_priority_dict = tag_priority_dict if tag_priority_dict is not None else {}

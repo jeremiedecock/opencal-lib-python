@@ -2,11 +2,14 @@
 This professor is used for intermediate-term memory training.
 """
 
+from opencal.core.professor.professor import AbstractProfessor
 import random
 
-class ProfessorRalph:
+class ProfessorRalph(AbstractProfessor):
 
     def __init__(self, card_list):
+        super().__init__()
+
         self.update_card_list(card_list)
         self._current_card = None
 

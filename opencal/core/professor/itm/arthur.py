@@ -3,15 +3,18 @@ For each right answer, the card is removed.
 This professor is used for intermediate-term memory training.
 """
 
+from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 DEFAULT_ACTIVE_LIST_INCREMENT_SIZE = 5
 
 # TODO : passer la constante prec dans le fichier de config YAML
 
-class ProfessorArthur:
+class ProfessorArthur(AbstractProfessor):
 
     def __init__(self, card_list, active_list_increment_size=DEFAULT_ACTIVE_LIST_INCREMENT_SIZE):
+        super().__init__()
+
         self.active_list_increment_size = active_list_increment_size
         self.update_card_list(card_list)
 

@@ -4,6 +4,7 @@ import copy
 import datetime
 import math
 
+from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 GRADE_CARD_NEVER_REVIEWED = -1
@@ -18,9 +19,17 @@ DEFAULT_DIFFICULTY = 1.
 
 VERBOSE = True
 
-class ProfessorBerenice:
+class ProfessorBerenice(AbstractProfessor):
 
-    def __init__(self, card_list, date_mock=None, max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE, tag_priority_dict=None, tag_difficulty_dict=None, reverse_level_0=False):
+    def __init__(self,
+                 card_list,
+                 date_mock=None,
+                 max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE,
+                 tag_priority_dict=None,
+                 tag_difficulty_dict=None,
+                 reverse_level_0=False):
+        super().__init__()
+
         self.max_cards_per_grade = max_cards_per_grade
         self.tag_priority_dict = tag_priority_dict if tag_priority_dict is not None else {}
         self.tag_difficulty_dict = tag_difficulty_dict if tag_difficulty_dict is not None else {}

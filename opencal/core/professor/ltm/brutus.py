@@ -4,11 +4,14 @@ This professor is used for intermediate-term memory training.
 
 import datetime
 
+from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
-class ProfessorBrutus:
+class ProfessorBrutus(AbstractProfessor):
 
     def __init__(self, card_list, date_mock=None):
+        super().__init__()
+
         self.update_card_list(card_list)
 
         if date_mock is None:
@@ -48,6 +51,14 @@ class ProfessorBrutus:
             if hide:
                 card["hidden"] = True
 
+            self.notify_observers_of_reply()
+
 
     def update_card_list(self, card_list):
         self._card_list = [card for card in card_list if not card["hidden"]]
+        #self.notify_observers()
+
+
+    @property
+    def remaining_cards(self):
+        return len(self._card_list)

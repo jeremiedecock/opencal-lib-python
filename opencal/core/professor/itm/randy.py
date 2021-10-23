@@ -5,11 +5,14 @@ This professor is used for intermediate-term memory training.
 import copy
 import random
 
+from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
-class ProfessorRandy:
+class ProfessorRandy(AbstractProfessor):
 
     def __init__(self, card_list):
+        super().__init__()
+
         self.update_card_list(card_list)
 
         # Shuffle list `self._card_list` in place and return None

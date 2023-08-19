@@ -15,6 +15,10 @@ docstring for a function, use ``opencal.get_version?<ENTER>`` (to view the
 docstring) and ``opencal.get_version??<ENTER>`` (to view the source code).
 """
 
+import opencal.config
+import opencal.io.database
+import opencal.path
+
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/
 #
@@ -35,5 +39,9 @@ __version__ = '0.1.dev1'
 
 def get_version():
     return __version__
+
+
+cfg, config_path = opencal.config.get_config()
+
 
 __all__ = []

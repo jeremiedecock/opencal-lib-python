@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import opencal.path
-import opencal.io.database
+import opencal.io.sqlitedb
 import opencal.io.pkb
 import os
 import json
@@ -76,7 +76,7 @@ def fill_sqlite_tables():
     con = sqlite3.connect(opencal_db_path)
     cur = con.cursor()
 
-    sql_request = f"""INSERT INTO {opencal.io.database.CARD_TABLE_NAME}
+    sql_request = f"""INSERT INTO {opencal.io.sqlitedb.CARD_TABLE_NAME}
     ( id,  creation_date,  hidden,  question,  answer,  tags) VALUES
     (:id, :creation_date, :hidden, :question, :answer, :tags)
     """
@@ -85,7 +85,7 @@ def fill_sqlite_tables():
 
     # INSERT SQL DATA INTO THE REVIEW TABLE #####
 
-    sql_request = F"""INSERT INTO {opencal.io.database.REVIEW_TABLE_NAME}
+    sql_request = F"""INSERT INTO {opencal.io.sqlitedb.REVIEW_TABLE_NAME}
     ( id,  card_id,  review_date,  result) VALUES
     (:id, :card_id, :review_date, :result)
     """
@@ -99,8 +99,8 @@ def fill_sqlite_tables():
 #############################
 
 if __name__ == "__main__":
-    # opencal.io.database.create_config_table()
-    opencal.io.database.create_card_table()
-    opencal.io.database.create_review_table()
+    # opencal.io.sqlitedb.create_config_table()
+    opencal.io.sqlitedb.create_card_table()
+    opencal.io.sqlitedb.create_review_table()
 
     fill_sqlite_tables()

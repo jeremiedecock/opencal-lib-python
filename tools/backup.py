@@ -2,6 +2,6 @@
 
 # Src: https://docs.python.org/3/library/sqlite3.html#sqlite3.Connection.backup
 
-import opencal.io.database
+import opencal.io.sqlitedb
 
-opencal.io.database.backup_db()
+opencal.io.sqlitedb.backup_db()

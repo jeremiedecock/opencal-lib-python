@@ -16,7 +16,7 @@ docstring) and ``opencal.get_version??<ENTER>`` (to view the source code).
 """
 
 import opencal.config
-import opencal.io.database
+import opencal.io.sqlitedb
 import opencal.path
 
 # PEP0440 compatible formatted version, see:

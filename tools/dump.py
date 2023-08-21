@@ -5,4 +5,5 @@
 
 import opencal.io.sqlitedb
 
-opencal.io.sqlitedb.dump_db()
+if __name__ == "__main__":
+    opencal.io.sqlitedb.dump_db()

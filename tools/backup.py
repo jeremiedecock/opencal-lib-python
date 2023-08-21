@@ -4,4 +4,5 @@
 
 import opencal.io.sqlitedb
 
-opencal.io.sqlitedb.backup_db()
+if __name__ == "__main__":
+    opencal.io.sqlitedb.backup_db()

@@ -12,6 +12,64 @@ CARD_TABLE_NAME = "t_card"
 REVIEW_TABLE_NAME = "t_review"
 
 
+# LOAD PKB ####################################################################
+
+def load_db():
+
+    opencal_db_path = opencal.path.expand_path(opencal.cfg['opencal']['db_path'])
+    con = sqlite3.connect(opencal_db_path)
+    cur = con.cursor()
+
+    # LOAD CARDS ######################
+
+    data_dict = {}
+
+    sql_query_str = f"SELECT id, creation_date, hidden, question, answer, tags FROM {CARD_TABLE_NAME} ORDER BY id"
+
+    for row in cur.execute(sql_query_str):
+        _id, creation_date_str, hidden, question, answer, tag_str = row
+
+        creation_date = datetime.datetime.strptime(creation_date_str, r"%Y-%m-%d %H:%M:%S")
+        tag_list = tag_str.split("\n")
+
+        if tag_list == [""]:
+            tag_list = []
+
+        data_dict[_id] = {
+            "cdate": creation_date,
+            "hidden": bool(hidden),
+            "question": question,
+            "answer": answer,
+            "reviews": [],
+            "tags": tag_list
+        }
+
+    # LOAD REVIEWS ####################
+
+    sql_query_str = f"SELECT id, card_id, review_date, result FROM {REVIEW_TABLE_NAME} ORDER BY review_date"
+
+    for row in cur.execute(sql_query_str):
+        _id, card_id, review_date_str, result = row
+
+        review_date = datetime.datetime.strptime(review_date_str, r"%Y-%m-%d %H:%M:%S")
+
+        review_dict = {
+            "rdate": review_date,
+            "result": result
+        }
+
+        data_dict[card_id]["reviews"].append(review_dict)
+
+    con.close()
+
+    # Write in `card_list` the `data_dict` values sorted by `data_dict` keys
+    card_list = [data_dict[_id] for _id in sorted(data_dict.keys())]
+
+    return card_list
+
+
+###############################################################################
+
 # def create_config_table():
 #     opencal_db_path = opencal.path.expand_path(opencal.cfg['opencal']['db_path'])
 #     con = sqlite3.connect(opencal_db_path)

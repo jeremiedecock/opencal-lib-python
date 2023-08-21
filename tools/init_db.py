@@ -17,7 +17,7 @@ def fill_sqlite_tables():
     # Load the XML database ###################################################
 
     xml_file_path = opencal.path.expand_path(XML_FILE_NAME)
-    xml_data_dict = opencal.io.pkb.load_pkb(xml_file_path)
+    card_list = opencal.io.pkb.load_pkb(xml_file_path)
 
     # Convert the XML data to SQL data ########################################
 
@@ -26,7 +26,7 @@ def fill_sqlite_tables():
 
     last_review_id = 0
 
-    for card_id, card_dict in enumerate(xml_data_dict):
+    for card_id, card_dict in enumerate(card_list):
 
         # Card ########################
 

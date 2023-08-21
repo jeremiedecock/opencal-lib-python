@@ -32,8 +32,8 @@ def fill_sqlite_tables():
 
         cdate = card_dict["cdate"]                   # TODO: convert to SQLite date format?
         hidden = card_dict["hidden"]
-        question = card_dict["question"].strip()
-        answer = card_dict.get("answer", "").strip()
+        question = card_dict["question"]      #.strip() # remove strip() because it generates fake differences with the original XML file
+        answer = card_dict.get("answer", "")  #.strip()
         tag_list = card_dict["tags"]
         review_list = card_dict["reviews"]
 

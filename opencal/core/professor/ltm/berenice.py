@@ -1,8 +1,9 @@
 """Berenice is the second professor implemented for long-term memory training in OpenCAL."""
 
-import copy
 import datetime
 import math
+
+from typing import Optional, Union
 
 from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
@@ -22,17 +23,17 @@ VERBOSE = True
 class ProfessorBerenice(AbstractProfessor):
 
     def __init__(self,
-                 card_list,
-                 date_mock=None,
-                 max_cards_per_grade=DEFAULT_MAX_CARDS_PER_GRADE,
-                 tag_priority_dict=None,
-                 tag_difficulty_dict=None,
-                 reverse_level_0=False):
+                 card_list: list,
+                 date_mock: Optional[datetime.date] = None,
+                 max_cards_per_grade: int = DEFAULT_MAX_CARDS_PER_GRADE,
+                 tag_priorities: Optional[dict] = None,
+                 tag_difficulties: Optional[dict] = None,
+                 reverse_level_0: bool = False):
         super().__init__()
 
         self.max_cards_per_grade = max_cards_per_grade
-        self.tag_priority_dict = tag_priority_dict if tag_priority_dict is not None else {}
-        self.tag_difficulty_dict = tag_difficulty_dict if tag_difficulty_dict is not None else {}
+        self.tag_priority_dict = tag_priorities if tag_priorities is not None else {}
+        self.tag_difficulty_dict = tag_difficulties if tag_difficulties is not None else {}
 
         if VERBOSE:
             print("Professor Berenice")
@@ -163,13 +164,14 @@ class ProfessorBerenice(AbstractProfessor):
                 card["hidden"] = True
 
 
-def datetime_to_date(d):
+def datetime_to_date(d: Union[datetime.datetime, datetime.date]) -> datetime.date:
     '''If the object is an instance of datetime.datetime then convert it to a datetime.datetime.date object.
 
     If it's already a date object, do nothing.'''
 
     if isinstance(d, datetime.datetime):
         d = d.date()
+
     return d
 
 

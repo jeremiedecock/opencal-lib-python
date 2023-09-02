@@ -25,8 +25,8 @@ opencal:
     shm_key: "{ ''.join(random.choice(string.ascii_letters) for _ in range(16)) }"
 
     # LTM Professor
-    # Possible choices: alice, berenice, celia
-    ltm_professor: celia
+    # Possible choices: alice, berenice, celia, doreen
+    ltm_professor: doreen
 
     # STM Professor
     # Possible choices: ralf, randy, arthur
@@ -47,6 +47,19 @@ opencal:
 
             max_cards_per_grade: 5
             reverse_level_0: true
+
+        doreen:
+
+            max_cards_per_grade: 5
+            priorities_per_level:
+                0:
+                    - sort_fn: "tag"
+                      reverse: True
+                    - sort_fn: "date"
+                      reverse: True
+                default:
+                    - sort_fn: "tag"
+                      reverse: True
 
         common:
 

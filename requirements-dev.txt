@@ -6,5 +6,6 @@
 #jupyterlab
 #matplotlib
 #plotly
+pylint
 #seaborn
 #voila

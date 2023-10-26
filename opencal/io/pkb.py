@@ -72,7 +72,7 @@ def load_pkb(pkb_path):
     xml_reader.setErrorHandler(pkb_handler)
 
     # Parse XML files
-    inputsource = xml.sax.InputSource(pkb_path)
+    inputsource = xml.sax.InputSource("file://" + pkb_path)
     xml_reader.parse(inputsource)
 
     return pkb_handler.card_list

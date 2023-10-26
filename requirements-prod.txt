@@ -1,0 +1,2 @@
+opencal
+#opencal @ git+ssh://git@gitlab.com/jdhp/opencal-lib-python.git

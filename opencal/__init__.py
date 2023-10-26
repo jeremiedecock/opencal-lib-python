@@ -15,6 +15,8 @@ docstring for a function, use ``opencal.get_version?<ENTER>`` (to view the
 docstring) and ``opencal.get_version??<ENTER>`` (to view the source code).
 """
 
+import importlib.metadata
+
 import opencal.config
 import opencal.io.sqlitedb
 import opencal.path
@@ -35,7 +37,7 @@ import opencal.path
 # Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
-__version__ = '0.1.dev1'
+__version__ = importlib.metadata.version("opencal")
 
 def get_version():
     return __version__

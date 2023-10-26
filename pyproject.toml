@@ -1,0 +1,39 @@
+[project]
+authors = [
+    {name = "Jérémie DECOCK", email = "jd.jdhp@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries :: Application Framework",
+]
+description = "OpenCAL core library for Python"
+dynamic = ["dependencies"]
+name = "opencal"
+readme = "README.rst"
+requires-python = ">=3.8"
+version = "0.2.dev0"
+# web_site_url = "http://www.jdhp.org/software_en.html#opencal"
+
+# # See https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies
+# [project.optional-dependencies]
+# numba = ["numba"]
+
+# [project.scripts]
+# opencal = "opcgui.qt.main:main"
+
+# See https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+[tool.setuptools]
+packages = [
+    "opencal",
+]
+
+# Use requirements.txt to setup dependencies (c.f. https://stackoverflow.com/a/73600610)
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}

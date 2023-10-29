@@ -54,8 +54,8 @@ class ProfessorBrutus(AbstractProfessor):
             self.notify_observers_of_reply()
 
 
-    def update_card_list(self, card_list):
-        self._card_list = [card for card in card_list if not card["hidden"]]
+    def update_card_list(self, card_list, review_hidden_cards: bool = False):
+        self._card_list = [card for card in card_list if ((not card["hidden"]) or review_hidden_cards)]
         #self.notify_observers()
 
 

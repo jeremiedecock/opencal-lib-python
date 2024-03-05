@@ -37,7 +37,7 @@ class ProfessorArthur(AbstractProfessor):
                 # Add to self._cards_in_progress_list the less well known cards from reviewed_cards_list
                 for (card_index, card) in reviewed_cards_list:
                     right_answers_rate = self._num_right_answers[card_index] / (self._num_right_answers[card_index] + self._num_wrong_answers[card_index])
-                    if right_answers_rate < self.right_answers_rate_threshold:
+                    if right_answers_rate <= self.right_answers_rate_threshold:
                         self._cards_in_progress_list.append((card_index, card))
                 print(f"Update the work in progress card list ; current index = {self._last_card_in_progress_index} ; len cards_in_progress_list = { len(self._cards_in_progress_list) }", end='', flush=True)
             else:

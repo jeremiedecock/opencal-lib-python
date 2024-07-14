@@ -403,10 +403,10 @@ class PKBHandler(ContentHandler, ErrorHandler):
 
 def main() -> None:
     """
-    Main function to load and print the personal knowledge base (PKB).
+    Main function to load and save the personal knowledge base (PKB).
 
     This function loads the PKB from the path specified in the configuration
-    and prints the list of cards.
+    then save it in another file.
 
     This function is used for debugging purposes (c.f. `.vscode/launch.json`).
 

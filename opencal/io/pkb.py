@@ -88,7 +88,7 @@ def save_pkb(
 
 # LOAD PKB ####################################################################
 
-def load_pkb(pkb_path: str) -> None:
+def load_pkb(pkb_path: str) -> List[Dict[str, Any]]:
     """
     Load the personal knowledge base (PKB) from an XML file.
 
@@ -270,6 +270,7 @@ class PKBHandler(ContentHandler, ErrorHandler):
             # Sort reviews ("in-place")
             self._current_card["reviews"].sort(key=lambda x: x["rdate"])
 
+            # TODO: IS THE FOLLOWING CODE REALLY USEFUL???
             # Add the "timedelta" and "last_validated_timedelta" attributes to each "review"
             if ("reviews" in self._current_card) and len(self._current_card["reviews"]) > 0:
                 self._current_card["reviews"][0]["timedelta"] = TIME_DELTA_OF_FIRST_REVIEWS

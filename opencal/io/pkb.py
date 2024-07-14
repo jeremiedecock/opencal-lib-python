@@ -1,15 +1,18 @@
 import datetime
+import opencal
 import os
+from typing import Any, Dict, List, Optional
 import warnings
 import xml.sax
 from xml.sax.handler import ContentHandler, ErrorHandler
 
 from opencal.core.data import RIGHT_ANSWER_STR
 
-PY_DATE_FORMAT = "%Y-%m-%d"
+PY_DATE_FORMAT = r"%Y-%m-%d"
 
 TIME_DELTA_OF_FIRST_REVIEWS = datetime.timedelta()    # Null time delta (0 day)
 INIT_VALIDATED_TIME_DELTA = datetime.timedelta()      # Null time delta (0 day)
+
 
 # EXCEPTION CLASSES ###########################################################
 
@@ -17,9 +20,33 @@ class XmlPkbError(Exception):
     """Exception raised if the XML PKB file is not valid."""
     pass
 
+
 # SAVE PKB ####################################################################
 
-def save_pkb(card_list, pkb_path):
+def save_pkb(
+        card_list: List[Dict[str, Any]],
+        pkb_path: str
+    ) -> None:
+    """
+    Save the personal knowledge base (PKB) to an XML file.
+
+    This function takes a list of cards and saves them to the specified
+    PKB path in XML format. Each card contains information such as creation
+    date, hidden status, question, answer, tags, and reviews.
+
+    Parameters
+    ----------
+    card_list : List[Dict[str, Any]]
+        A list of dictionaries where each dictionary represents a card with
+        keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    pkb_path : str
+        The file path where the PKB should be saved. This path can include
+        user home directory shortcuts (e.g., "~/...") and relative paths.
+
+    Returns
+    -------
+    None
+    """
 
     pkb_path = os.path.expanduser(pkb_path)  # to handle "~/..." paths
     pkb_path = os.path.abspath(pkb_path)     # to handle relative paths
@@ -31,7 +58,7 @@ def save_pkb(card_list, pkb_path):
             cdate_str = card['cdate'].strftime(PY_DATE_FORMAT)
             hidden_str = 'true' if card['hidden'] else 'false'
 
-            fd.write('<card cdate="{}" hidden="{}">\n'.format(cdate_str, hidden_str))
+            fd.write(f'<card cdate="{cdate_str}" hidden="{hidden_str}">\n')
 
             # In the following code, the "]]>" is replaced by "]]]]><![CDATA[>"
             # to avoid premature end of the CDATA section by XML parser ("CDATA nesting").
@@ -41,26 +68,46 @@ def save_pkb(card_list, pkb_path):
             # - https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
 
             question_str = card['question'].replace("]]>", "]]]]><![CDATA[>")
-            fd.write('<question><![CDATA[{}]]></question>\n'.format(question_str))
+            fd.write(f'<question><![CDATA[{question_str}]]></question>\n')
             if card['answer'] == '':
                 fd.write('<answer/>\n')
             else:
                 answer_str = card['answer'].replace("]]>", "]]]]><![CDATA[>")
-                fd.write('<answer><![CDATA[{}]]></answer>\n'.format(answer_str))
+                fd.write(f'<answer><![CDATA[{answer_str}]]></answer>\n')
 
             for tag in card['tags']:
-                fd.write('<tag>{}</tag>\n'.format(tag))
+                fd.write(f'<tag>{tag}</tag>\n')
             
             for review in card['reviews']:
                 rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
-                fd.write('<review rdate="{}" result="{}"/>\n'.format(rdate_str, review['result']))
+                fd.write(f'<review rdate="{rdate_str}" result="{review["result"]}"/>\n')
 
             fd.write('</card>\n')
         fd.write('</pkb>\n')
 
+
 # LOAD PKB ####################################################################
 
-def load_pkb(pkb_path):
+def load_pkb(pkb_path: str) -> None:
+    """
+    Load the personal knowledge base (PKB) from an XML file.
+
+    This function reads the PKB from the specified XML file path and parses
+    it into a list of cards. Each card is represented as a dictionary with
+    keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+
+    Parameters
+    ----------
+    pkb_path : str
+        The file path from which the PKB should be loaded. This path can include
+        user home directory shortcuts (e.g., "~/...") and relative paths.
+
+    Returns
+    -------
+    List[Dict[str, Any]]
+        A list of dictionaries where each dictionary represents a card with
+        keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    """
 
     pkb_path = os.path.expanduser(pkb_path)  # to handle "~/..." paths
     pkb_path = os.path.abspath(pkb_path)     # to handle relative paths
@@ -81,17 +128,45 @@ def load_pkb(pkb_path):
 class PKBHandler(ContentHandler, ErrorHandler):
     """A content handler"""
 
-    def __init__(self):
-        self._card_list = []
+    def __init__(self) -> None:
+        """
+        Initialize the PKBHandler.
 
-        self._current_card = None
-        self._current_question = None
-        self._current_answer = None
-        self._current_review = None
-        self._current_tag = None
+        This constructor initializes the PKBHandler with empty structures
+        to store the parsed data from the XML file. It sets up lists and
+        dictionaries to hold card information, questions, answers, reviews,
+        and tags.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self._card_list: List[Dict[str, Any]] = []
+
+        self._current_card: Optional[Dict[str, Any]] = None
+        self._current_question: Optional[str] = None
+        self._current_answer: Optional[str] = None
+        self._current_review: Optional[Dict[str, Any]] = None
+        self._current_tag: Optional[str] = None
 
     @property
-    def card_list(self):
+    def card_list(self) -> List[Dict[str, Any]]:
+        """
+        Get the list of cards.
+
+        This property returns the list of cards parsed from the XML file.
+        Each card is represented as a dictionary with keys such as 'cdate',
+        'hidden', 'question', 'answer', 'tags', and 'reviews'.
+
+        Returns
+        -------
+        List[Dict[str, Any]]
+            A list of dictionaries where each dictionary represents a card.
+        """
         return self._card_list
 
     # ContentHandler ############################
@@ -102,7 +177,29 @@ class PKBHandler(ContentHandler, ErrorHandler):
     #def endDocument(self):
     #    print("End document")
 
-    def startElement(self, name, attr):
+    def startElement(
+            self,
+            name: str,
+            attr: Dict[str, str]
+        ) -> None:
+        """
+        Handle the start of an XML element.
+
+        This method is called by the XML parser when it encounters the start
+        of an element. It processes the element and its attributes, updating
+        the current state of the handler.
+
+        Parameters
+        ----------
+        name : str
+            The name of the XML element.
+        attr : Dict[str, str]
+            The attributes of the XML element.
+
+        Returns
+        -------
+        None
+        """
         #print("Start element:", name, end=' ')
         #for key, value in list(attr.items()):
         #    print("[", key, "=", value, "]", end=' ')
@@ -121,7 +218,7 @@ class PKBHandler(ContentHandler, ErrorHandler):
                     elif value == "false":
                         self._current_card[key] = False
                     else:
-                        raise Exception('Unexpected value for the "hidden" attribute: got {} (expected "true" or "false")'.format(value))
+                        raise Exception(f'Unexpected value for the "hidden" attribute: got {value} (expected "true" or "false")')
                 else:
                     raise ValueError(key)
         elif name == "question":
@@ -145,7 +242,26 @@ class PKBHandler(ContentHandler, ErrorHandler):
             assert self._current_tag is None and self._current_card is not None
             self._current_tag = ""
 
-    def endElement(self, name):
+    def endElement(
+            self,
+            name: str
+        ) -> None:
+        """
+        Handle the end of an XML element.
+
+        This method is called by the XML parser when it encounters the end
+        of an element. It processes the element and updates the current state
+        of the handler.
+
+        Parameters
+        ----------
+        name : str
+            The name of the XML element.
+
+        Returns
+        -------
+        None
+        """
         #print("End element:", name)
 
         if name == "card":
@@ -199,7 +315,22 @@ class PKBHandler(ContentHandler, ErrorHandler):
     #     """TODO: improve this"""
     #     print("End NS element:", name, qname)
 
-    def characters(self, ch):
+    def characters(
+            self,
+            ch: str
+        ) -> None:
+        """
+        Handle character data within an XML element.
+
+        Parameters
+        ----------
+        ch : str
+            The character data.
+        
+        Returns
+        -------
+        None
+        """
         #print("Characters:", ch)
 
         if self._current_question is not None:
@@ -213,11 +344,91 @@ class PKBHandler(ContentHandler, ErrorHandler):
 
     # ErrorHandler ##############################
 
-    def fatalError(self, exception):
+    def fatalError(
+            self,
+            exception: xml.sax.SAXParseException
+        ) -> None:
+        """
+        Handle a fatal error during XML parsing.
+
+        Parameters
+        ----------
+        exception : xml.sax.SAXParseException
+            The exception that was raised.
+        
+        Returns
+        -------
+        None
+        """
         print("Fatal error:", exception)  # TODO
 
-    def error(self, exception):
+    def error(
+            self,
+            exception: xml.sax.SAXParseException
+        ) -> None:
+        """
+        Handle a non-fatal error during XML parsing.
+
+        Parameters
+        ----------
+        exception : xml.sax.SAXParseException
+            The exception that was raised.
+        
+        Returns
+        -------
+        None
+        """
         print("Error:", exception)        # TODO
 
-    def warning(self, exception):
+    def warning(
+            self,
+            exception: xml.sax.SAXParseException
+        ) -> None:
+        """
+        Handle a warning during XML parsing.
+
+        Parameters
+        ----------
+        exception : xml.sax.SAXParseException
+            The exception that was raised.
+        
+        Returns
+        -------
+        None
+        """
         warnings.warn(exception)
+
+
+# DEBUG #######################################################################
+
+def main() -> None:
+    """
+    Main function to load and print the personal knowledge base (PKB).
+
+    This function loads the PKB from the path specified in the configuration
+    and prints the list of cards.
+
+    This function is used for debugging purposes (c.f. `.vscode/launch.json`).
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+    load_pkb_path = opencal.cfg["opencal"]["pkb_path"]
+    save_pkb_path = "/tmp/debug.pkb"   # opencal.cfg["opencal"]["pkb_path"]
+
+    print(f"Loading PKB from {load_pkb_path}")
+    card_list = load_pkb(load_pkb_path)
+
+    # print(card_list)
+
+    print(f"Saving PKB to {save_pkb_path}")
+    save_pkb(card_list, save_pkb_path)
+
+
+if __name__ == "__main__":
+    main()

@@ -72,7 +72,7 @@ class ProfessorAlice(AbstractProfessor):
                 }
                 card["reviews"].append(review)
             else:
-                raise ValueError("Unknown answer : {}".format(answer))
+                raise ValueError(f"Unknown answer : {answer}")
 
             if hide:
                 card["hidden"] = True

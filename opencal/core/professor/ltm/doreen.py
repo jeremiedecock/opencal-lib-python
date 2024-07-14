@@ -142,7 +142,7 @@ class ProfessorDoreen(AbstractProfessor):
                 num_cards  = len(self.current_sub_list)
             else:
                 num_cards = len(self._card_list_dict.get(k, []))
-            print("{}: {:0.1f} / {} ({})".format(k, v, self.max_cards_per_grade, num_cards if num_cards > 0 else '-'))
+            print(f"{k}: {v:0.1f} / {self.max_cards_per_grade} ({num_cards if num_cards > 0 else '-'})")
         print("Number of wrong answers:", self.num_wrong_answers)
         print("---")
 
@@ -170,7 +170,7 @@ class ProfessorDoreen(AbstractProfessor):
             elif answer == "skip level":
                 self.current_sub_list = []
             else:
-                raise ValueError("Unknown answer : {}".format(answer))
+                raise ValueError(f"Unknown answer : {answer}")
 
             if hide:
                 card["hidden"] = True

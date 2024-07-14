@@ -46,7 +46,7 @@ class ProfessorBrutus(AbstractProfessor):
             elif answer == "skip level":
                 pass
             else:
-                raise ValueError("Unknown answer : {}".format(answer))
+                raise ValueError(f"Unknown answer : {answer}")
 
             if hide:
                 card["hidden"] = True

@@ -33,7 +33,7 @@ class ProfessorRandy(AbstractProfessor):
             elif answer == WRONG_ANSWER_STR:
                 self._card_list.append(card)
             else:
-                raise ValueError("Unknown answer : {}".format(answer))
+                raise ValueError(f"Unknown answer : {answer}")
 
     def update_card_list(self, card_list):
         self._card_list = [card for card in card_list if not card["hidden"]]

@@ -48,11 +48,11 @@ class ProfessorErnest(AbstractProfessor):
             elif answer == RIGHT_ANSWER_STR:
                 print(".", end='', flush=True)
             else:
-                raise ValueError("Unknown answer : {}".format(answer))
+                raise ValueError(f"Unknown answer : {answer}")
 
 
     def update_card_list(self, card_list):
         self._cards_not_yet_reviewed_list = [card for card in card_list if not card["hidden"]]
         self._cards_in_progress_list = []
         self._last_card_in_progress_index = 0
-        print("Review {:d} cards".format(len(card_list)))
+        print(f"Review {len(card_list)} cards")

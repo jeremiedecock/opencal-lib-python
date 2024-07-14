@@ -61,7 +61,7 @@ class ProfessorArthur(AbstractProfessor):
                 self._num_right_answers[card_index] += 1
                 print(".", end='', flush=True)
             else:
-                raise ValueError("Unknown answer : {}".format(answer))
+                raise ValueError(f"Unknown answer : {answer}")
 
 
     def update_card_list(self, card_list):
@@ -70,4 +70,4 @@ class ProfessorArthur(AbstractProfessor):
         self._num_right_answers = [0 for card in card_list if not card["hidden"]]          # the total number of right answers for each card
         self._num_wrong_answers = [0 for card in card_list if not card["hidden"]]          # the total number of wrong answers for each card
         self._last_card_in_progress_index = 0
-        print("Review {:d} cards".format(len(card_list)))
+        print(f"Review {len(card_list)} cards")

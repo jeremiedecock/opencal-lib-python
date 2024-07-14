@@ -12,11 +12,19 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "OpenCAL (load and save PKB file)",
+            "name": "OpenCAL (load and save XML PKB file)",
             "type": "python",
             "request": "launch",
             "args": [],
             "program": "opencal/io/pkb.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "OpenCAL (load and save SQLite DB)",
+            "type": "python",
+            "request": "launch",
+            "args": [],
+            "program": "opencal/io/sqlitedb.py",
             "console": "integratedTerminal"
         }
     ]

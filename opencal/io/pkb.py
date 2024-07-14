@@ -48,8 +48,7 @@ def save_pkb(
     None
     """
 
-    pkb_path = os.path.expanduser(pkb_path)  # to handle "~/..." paths
-    pkb_path = os.path.abspath(pkb_path)     # to handle relative paths
+    pkb_path = opencal.path.expand_path(pkb_path)
 
     with open(pkb_path, 'w') as fd:
         fd.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
@@ -109,8 +108,7 @@ def load_pkb(pkb_path: str) -> List[Dict[str, Any]]:
         keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
     """
 
-    pkb_path = os.path.expanduser(pkb_path)  # to handle "~/..." paths
-    pkb_path = os.path.abspath(pkb_path)     # to handle relative paths
+    pkb_path = opencal.path.expand_path(pkb_path)
 
     # Make XML parser
     xml_reader = xml.sax.make_parser()

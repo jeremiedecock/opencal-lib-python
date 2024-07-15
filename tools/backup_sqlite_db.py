@@ -5,4 +5,10 @@
 import opencal.io.sqlitedb
 
 if __name__ == "__main__":
-    opencal.io.sqlitedb.backup_db()
+    opencal_db_path = opencal.cfg['opencal']['db_path']
+    backup_dir_path = opencal.cfg['opencal']['db_backup_path']
+
+    opencal.io.sqlitedb.backup_db(
+        opencal_db_path=opencal_db_path,
+        backup_dir_path=backup_dir_path
+    )

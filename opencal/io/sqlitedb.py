@@ -392,11 +392,35 @@ def create_itm_review_table(opencal_db_path: os.PathLike) -> None:
     con.close()
 
 
-def backup_db(prefix: str = "") -> None:
+def backup_db(
+        opencal_db_path: os.PathLike,
+        backup_dir_path: os.PathLike,
+        prefix: str = ""
+    ) -> None:
+    """
+    Create a backup of the SQLite database.
+
+    This function creates a backup of the SQLite database located at the specified
+    path and saves it to the specified backup directory with an optional prefix
+    and the current date appended to the filename.
+
+    Parameters
+    ----------
+    opencal_db_path : os.PathLike
+        The path to the SQLite database file to be backed up.
+    backup_dir_path : os.PathLike
+        The path to the directory where the backup file will be saved.
+    prefix : str, optional
+        An optional prefix to add to the backup file name (default is "").
+
+    Returns
+    -------
+    None
+    """
     today_str = datetime.datetime.now().strftime(r"%Y-%m-%d")
 
-    opencal_db_path = opencal.path.expand_path(opencal.cfg['opencal']['db_path'])
-    backup_file_path = os.path.join(opencal.path.expand_path(opencal.cfg['opencal']['db_backup_path']), prefix + today_str + "_opencal.sqlite")
+    opencal_db_path = opencal.path.expand_path(opencal_db_path)
+    backup_file_path = os.path.join(opencal.path.expand_path(backup_dir_path), prefix + today_str + "_opencal.sqlite")
 
     def progress(status, remaining, total):
         # print(f'Copied {total-remaining} of {total} pages...')
@@ -414,9 +438,29 @@ def backup_db(prefix: str = "") -> None:
     print("Database cloned in", backup_file_path)
 
 
-def dump_db() -> None:
-    opencal_db_path = opencal.path.expand_path(opencal.cfg['opencal']['db_path'])
-    dump_file_path = os.path.join(opencal.path.expand_path(opencal.cfg['opencal']['db_backup_path']), "opencal.sql")
+def dump_db(
+        opencal_db_path: os.PathLike,
+        dump_dir_path: os.PathLike
+    ) -> None:
+    """
+    Dump the SQLite database to a SQL file.
+
+    This function creates a SQL dump of the SQLite database located at the specified
+    path and saves it to the specified dump directory.
+
+    Parameters
+    ----------
+    opencal_db_path : os.PathLike
+        The path to the SQLite database file to be dumped.
+    dump_dir_path : os.PathLike
+        The path to the directory where the dump file will be saved.
+
+    Returns
+    -------
+    None
+    """
+    opencal_db_path = opencal.path.expand_path(opencal_db_path)
+    dump_file_path = os.path.join(opencal.path.expand_path(dump_dir_path), "opencal.sql")
 
     con = sqlite3.connect(opencal_db_path)
 
@@ -429,9 +473,30 @@ def dump_db() -> None:
     print("Database dumped in", dump_file_path)
 
 
-def restore_db() -> None:
-    opencal_db_path = opencal.path.expand_path(opencal.cfg['opencal']['db_path'])
-    dump_file_path = os.path.join(opencal.path.expand_path(opencal.cfg['opencal']['db_backup_path']), "opencal.sql")
+def restore_db(
+        opencal_db_path: os.PathLike,
+        dump_dir_path: os.PathLike
+    ) -> None:
+    """
+    Restore the SQLite database from a SQL dump file.
+
+    This function restores the SQLite database located at the specified path
+    from a SQL dump file located in the specified dump directory. If the
+    original database exists, it creates a backup before restoring.
+
+    Parameters
+    ----------
+    opencal_db_path : os.PathLike
+        The path to the SQLite database file to be restored.
+    dump_dir_path : os.PathLike
+        The path to the directory where the dump file is located.
+
+    Returns
+    -------
+    None
+    """
+    opencal_db_path = opencal.path.expand_path(opencal_db_path)
+    dump_file_path = os.path.join(opencal.path.expand_path(dump_dir_path), "opencal.sql")
 
     # Backup the original database if it exists
     if os.path.exists(opencal_db_path):

@@ -16,8 +16,8 @@ PY_DATE_FORMAT = r"%Y-%m-%d"
 
 CONFIG_TABLE_NAME = "t_config"
 CARD_TABLE_NAME = "t_card"
-LTM_REVIEW_TABLE_NAME = "t_ltm_review"
-ITM_REVIEW_TABLE_NAME = "t_itm_review"
+ACQUISITION_REVIEW_TABLE_NAME = "t_acquisition_review"
+CONSOLIDATION_REVIEW_TABLE_NAME = "t_consolidation_review"
 
 
 # SAVE PKB ####################################################################
@@ -119,7 +119,7 @@ def save_pkb(
 
     # INSERT SQL DATA INTO THE REVIEW TABLE #####
 
-    sql_request = f"""INSERT INTO {LTM_REVIEW_TABLE_NAME}
+    sql_request = f"""INSERT INTO {CONSOLIDATION_REVIEW_TABLE_NAME}
     ( id,  card_id,  review_date,  result) VALUES
     (:id, :card_id, :review_date, :result)
     """
@@ -194,15 +194,15 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
             "hidden": bool(is_hidden),
             "question": question,
             "answer": answer,
-            "reviews": [],        # List of dictionaries (each dictionary object is a LTM review for this card)
+            "reviews": [],        # List of dictionaries (each dictionary object is a *consolidation review* for this card)
             "tags": tags_list
         }
 
     # LOAD REVIEWS ####################
 
-    sql_query_str = f"SELECT id, card_id, review_date, result FROM {LTM_REVIEW_TABLE_NAME} ORDER BY review_date"
+    sql_query_str = f"SELECT id, card_id, review_date, result FROM {CONSOLIDATION_REVIEW_TABLE_NAME} ORDER BY review_date"
 
-    # For each LTM review in the database
+    # For each *consolidation review* in the database
     for row in cur.execute(sql_query_str):
         review_id, card_id, review_date_str, result = row
 
@@ -234,9 +234,9 @@ def create_all_tables(opencal_db_path: os.PathLike) -> None:
     """
     Create all necessary tables in the SQLite database.
 
-    This function creates the configuration, card, long-term memory (LTM) review,
-    and immediate-term memory (ITM) review tables in the SQLite database located
-    at the specified path.
+    This function creates the configuration, card, acquisition and
+    consolidation review tables in the SQLite database located at the specified
+    path.
 
     Parameters
     ----------
@@ -249,8 +249,8 @@ def create_all_tables(opencal_db_path: os.PathLike) -> None:
     """
     create_config_table(opencal_db_path)
     create_card_table(opencal_db_path)
-    create_ltm_review_table(opencal_db_path)
-    create_itm_review_table(opencal_db_path)
+    create_consolidation_review_table(opencal_db_path)
+    create_acquisition_review_table(opencal_db_path)
 
 
 def create_config_table(opencal_db_path: os.PathLike) -> None:
@@ -321,8 +321,8 @@ def create_card_table(opencal_db_path: os.PathLike) -> None:
     con.close()
 
 
-def create_ltm_review_table(opencal_db_path: os.PathLike) -> None:
-    print(f"Initializing table {LTM_REVIEW_TABLE_NAME} in database {opencal_db_path}")
+def create_consolidation_review_table(opencal_db_path: os.PathLike) -> None:
+    print(f"Initializing table {CONSOLIDATION_REVIEW_TABLE_NAME} in database {opencal_db_path}")
 
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
 
@@ -331,19 +331,19 @@ def create_ltm_review_table(opencal_db_path: os.PathLike) -> None:
 
     # DELETE TABLE ##############
 
-    print(f"Deleting table {LTM_REVIEW_TABLE_NAME} before re-creating it...")
+    print(f"Deleting table {CONSOLIDATION_REVIEW_TABLE_NAME} before re-creating it...")
 
     try:
-        cur.execute(f"DROP TABLE {LTM_REVIEW_TABLE_NAME}")
+        cur.execute(f"DROP TABLE {CONSOLIDATION_REVIEW_TABLE_NAME}")
     except sqlite3.OperationalError as e:
         # The database does not exist
         print(e)
 
     # CREATE TABLE ##############
 
-    print(f"Creating table {LTM_REVIEW_TABLE_NAME}...")
+    print(f"Creating table {CONSOLIDATION_REVIEW_TABLE_NAME}...")
 
-    sql_query_str = f"""CREATE TABLE {LTM_REVIEW_TABLE_NAME} (
+    sql_query_str = f"""CREATE TABLE {CONSOLIDATION_REVIEW_TABLE_NAME} (
         id                   INTEGER PRIMARY KEY AUTOINCREMENT,
         card_id              INTEGER NOT NULL,
         review_date          TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -356,8 +356,8 @@ def create_ltm_review_table(opencal_db_path: os.PathLike) -> None:
     con.close()
 
 
-def create_itm_review_table(opencal_db_path: os.PathLike) -> None:
-    print(f"Initializing table {ITM_REVIEW_TABLE_NAME} in database {opencal_db_path}")
+def create_acquisition_review_table(opencal_db_path: os.PathLike) -> None:
+    print(f"Initializing table {ACQUISITION_REVIEW_TABLE_NAME} in database {opencal_db_path}")
 
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
 
@@ -366,19 +366,19 @@ def create_itm_review_table(opencal_db_path: os.PathLike) -> None:
 
     # DELETE TABLE ##############
 
-    print(f"Deleting table {ITM_REVIEW_TABLE_NAME} before re-creating it...")
+    print(f"Deleting table {ACQUISITION_REVIEW_TABLE_NAME} before re-creating it...")
 
     try:
-        cur.execute(f"DROP TABLE {ITM_REVIEW_TABLE_NAME}")
+        cur.execute(f"DROP TABLE {ACQUISITION_REVIEW_TABLE_NAME}")
     except sqlite3.OperationalError as e:
         # The database does not exist
         print(e)
 
     # CREATE TABLE ##############
 
-    print(f"Creating table {ITM_REVIEW_TABLE_NAME}...")
+    print(f"Creating table {ACQUISITION_REVIEW_TABLE_NAME}...")
 
-    sql_query_str = f"""CREATE TABLE {ITM_REVIEW_TABLE_NAME} (
+    sql_query_str = f"""CREATE TABLE {ACQUISITION_REVIEW_TABLE_NAME} (
         id                   INTEGER PRIMARY KEY AUTOINCREMENT,
         card_id              INTEGER NOT NULL,
         review_datetime      TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -513,8 +513,8 @@ def restore_db(
     # tables = [
     #     "t_config",
     #     "t_card",
-    #     "t_ltm_review",
-    #     "t_itm_review"
+    #     "t_acquisition_review",
+    #     "t_consolidation_review"
     # ]
 
     for table_name in tables:

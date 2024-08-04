@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.ltm.alice" module.
+This module contains unit tests for the "opencal.core.professor.consolidation.alice" module.
 """
 
-from opencal.core.professor.ltm import alice
+from opencal.core.professor.consolidation import alice
 
 from opencal.core.mocks import DateMock
 

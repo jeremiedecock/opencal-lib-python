@@ -1,6 +1,7 @@
-"""Doreen is the third professor implemented for long-term memory training in OpenCAL.
+"""Célia is the third *consolidation professor*, implemented for long-term memory training in OpenCAL.
 
-Doreen est similaire à Celia excepté que chaque niveau peut être triés selon des critères différents."""
+Celia est similaire à Bérénice excepté que les niveaux -1 et -2 de Bérénice sont remplacés par un unique niveau 0
+et que les cartes de niveau 0 sont triés par mise à jours la plus récente : max(cdate, max(rdate))"""
 
 import datetime
 import math
@@ -21,35 +22,22 @@ DEFAULT_DIFFICULTY = 1.
 
 VERBOSE = True
 
-class ProfessorDoreen(AbstractProfessor):
+class ProfessorCelia(AbstractProfessor):
 
     def __init__(self,
                  card_list: list,
                  date_mock: Optional[datetime.date] = None,
                  max_cards_per_grade: int = DEFAULT_MAX_CARDS_PER_GRADE,
                  tag_priorities: Optional[dict] = None,                   # TODO: Python > 3.8: dict | None = None
-                 tag_difficulties: Optional[dict] = None,
-                 priorities_per_level: Optional[dict] = None):
+                 tag_difficulties: Optional[dict] = None):
         super().__init__()
 
         self.max_cards_per_grade = max_cards_per_grade
         self.tag_priority_dict = tag_priorities if tag_priorities is not None else {}
         self.tag_difficulty_dict = tag_difficulties if tag_difficulties is not None else {}
-        self.priorities_per_level = priorities_per_level
-
-        if self.priorities_per_level is None:
-            self.priorities_per_level = {
-                0: [
-                    {'sort_fn': 'tag', 'reverse': True},
-                    {'sort_fn': 'date', 'reverse': True}
-                ],
-                'default': [
-                    {'sort_fn': 'tag', 'reverse': True}
-                ]
-            }
 
         if VERBOSE:
-            print("Professor Doreen")
+            print("Professor Celia")
             print("max_cards_per_grade =", self.max_cards_per_grade)
             print("tag_priority_dict =", self.tag_priority_dict)
             print("tag_difficulty_dict =", self.tag_difficulty_dict)
@@ -116,7 +104,7 @@ class ProfessorDoreen(AbstractProfessor):
             self.current_sub_list = self._card_list_dict.pop(self.current_grade)  # rem: this remove current_grade from _card_list_dict
 
             # Sort the current sub_list
-            sort_sub_list(self.current_sub_list, self.current_grade, self.tag_priority_dict, self.priorities_per_level)
+            sort_sub_list(self.current_sub_list, self.current_grade, self.tag_priority_dict)
         else:
             self.current_grade = None
             self.current_sub_list = None
@@ -261,7 +249,7 @@ def delta_days(grade):
 
 def estimate_card_priority(card, tag_priority_dict):
     # TODO: estimate the priority of each card... -> utilise deux liste de liste tags definie dans le fichier de config .yaml :$
-    # prof_doreen = [['maths', 'algebre', ...], ['accenta'], ['important', 'high priority', ...], ...] ;
+    # prof_celia = [['maths', 'algebre', ...], ['accenta'], ['important', 'high priority', ...], ...] ;
     # prof_berebice_low_priority_tags = [[...], ...] -> chaque sous liste est un ensemble de tags équivalant ;
     # chaque tag ds high priority => card priority += 1 ; chaque tag dans low_prio_list => card priority -= 1
 
@@ -295,22 +283,20 @@ def estimate_card_difficulty(card, tag_difficulty_dict):
     return card_difficulty
 
 
-def sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_level):
+def sort_sub_list(sub_list, sub_list_grade, tag_priority_dict):
     """Une "sub_list" est un liste de cartes où toutes les cartes ont le même "grade"
 
     mis dans une fonction à part pour pouvoir être testé plus facilement dans des tests unitaires
     """
-    if sub_list_grade not in priorities_per_level.keys():
-        sub_list_grade = "default"
+    if sub_list_grade == 0:
+        # Sort level 2 (minor sort level i.e. to sort cards having the same "last update date"):
+        # Sort current_sub_list according to the priority level of each card
+        sub_list.sort(key=lambda _card : _card["priority"], reverse=True)
 
-    priority_list = priorities_per_level[sub_list_grade]
-
-    for priority_dict in priority_list:
-        if priority_dict["sort_fn"] == "tag":
-            sort_fn = lambda _card : _card["priority"]
-        elif priority_dict["sort_fn"] == "date":
-            sort_fn = lambda _card : max([_card["cdate"]] + [review["rdate"] for review in _card["reviews"]])
-        else:
-            raise Exception(f'Unknown sort function {priority_dict["sort_fn"]}; available functions are: "tag" or "date"')
-        
-        sub_list.sort(key=sort_fn, reverse=priority_dict["reverse"])
+        # Sort level 1 (major sort level):
+        # Apply some special rules for cards having a grade equals to 0
+        # Sort level 0 cards by descending date
+        sub_list.sort(key=lambda _card : max([_card["cdate"]] + [review["rdate"] for review in _card["reviews"]]), reverse=True)
+    else:
+        # Sort current_sub_list according to the priority level of each card
+        sub_list.sort(key=lambda _card : _card["priority"], reverse=True)

@@ -1,6 +1,6 @@
 """Professor Ernest pick cards in an "work in progress" window that is progressively moved along the full cards list.
 For each right answer, the card is removed.
-This professor is used for intermediate-term memory training.
+This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 """
 
 from opencal.core.professor.professor import AbstractProfessor

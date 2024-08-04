@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.ltm.celia" module.
+This module contains unit tests for the "opencal.core.professor.consolidation.celia" module.
 """
 
-from opencal.core.professor.ltm import celia
+from opencal.core.professor.consolidation import celia
 
 from opencal.core.mocks import DateMock
 

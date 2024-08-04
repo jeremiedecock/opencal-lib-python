@@ -1,4 +1,4 @@
-"""Alice is the first professor implemented for long-term memory training in OpenCAL.
+"""Alice is the first *consolidation professor*, implemented for long-term memory training in OpenCAL.
 This professor doesn't validate reviews when it's too early...
 """
 

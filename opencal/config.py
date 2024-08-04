@@ -24,13 +24,13 @@ opencal:
     # Unique key of the shared memory used to prevent more than one instance of the application
     shm_key: "{ ''.join(random.choice(string.ascii_letters) for _ in range(16)) }"
 
-    # LTM Professor
-    # Possible choices: alice, berenice, celia, doreen
-    ltm_professor: doreen
+    # Consolidation professor
+    # Possible choices are: alice, berenice, celia, doreen
+    consolidation_professor: doreen
 
-    # STM Professor
-    # Possible choices: ralf, randy, arthur
-    stm_professor: arthur
+    # Acquisition professor
+    # Possible choices are: ralf, randy, arthur
+    acquisition_professor: arthur
 
     professors:
 
@@ -94,8 +94,8 @@ opencal_ui:
 #     pkb_medias_path: str
 #     mathjax_path: str
 #     html_scale: float
-#     ltm_professor: str
-#     stm_professor: str
+#     consolidation_professor: str
+#     acquisition_professor: str
 #     active_list_increment_size: int
 #     max_cards_per_grade: int
 #     tag_priority_dict: dict

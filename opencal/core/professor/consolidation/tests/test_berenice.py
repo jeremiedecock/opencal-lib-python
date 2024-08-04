@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.ltm.doreen" module.
+This module contains unit tests for the "opencal.core.professor.consolidation.berenice" module.
 """
 
-from opencal.core.professor.ltm import doreen
+from opencal.core.professor.consolidation import berenice
 
 from opencal.core.mocks import DateMock
 
@@ -573,51 +573,50 @@ ONE_HIDDEN_CARD = [CARD_HIDDEN]
 ###############################################################################
 
 def test_card_without_review():
-    assert doreen.assess(CARD_WITHOUT_REVIEW_1, DateMock) == 0
-    assert doreen.assess(CARD_BASIC_LEVEL_MINUS1_1, DateMock) == 0
-    assert doreen.assess(CARD_BASIC_LEVEL_MINUS1_2, DateMock) == 0
+    assert berenice.assess(CARD_WITHOUT_REVIEW_1, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
+    assert berenice.assess(CARD_BASIC_LEVEL_MINUS1_1, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
+    assert berenice.assess(CARD_BASIC_LEVEL_MINUS1_2, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
 
 def test_card_made_today():
-    assert doreen.assess(CARD_MADE_TODAY, DateMock) == doreen.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert berenice.assess(CARD_MADE_TODAY, DateMock) == berenice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_card_made_today_with_time():
-    assert doreen.assess(CARD_MADE_TODAY_WITH_TIME, DateMock) == doreen.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert berenice.assess(CARD_MADE_TODAY_WITH_TIME, DateMock) == berenice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 def test_card_made_yesterday_with_time():
-    assert doreen.assess(CARD_MADE_YESTERDAY_WITH_TIME, DateMock) == 0
+    assert berenice.assess(CARD_MADE_YESTERDAY_WITH_TIME, DateMock) == berenice.GRADE_CARD_NEVER_REVIEWED
 
 def test_basic_cards():
-    assert doreen.assess(CARD_BASIC_LEVEL0_1, DateMock) == 0
-    assert doreen.assess(CARD_BASIC_LEVEL0_2, DateMock) == 0
-    assert doreen.assess(CARD_BASIC_LEVEL1_1, DateMock) == 1
-    assert doreen.assess(CARD_BASIC_LEVEL2_1, DateMock) == 2
-    assert doreen.assess(CARD_BASIC_LEVEL2_2, DateMock) == 2
-    assert doreen.assess(CARD_BASIC_LEVEL2_3, DateMock) == 2
+    assert berenice.assess(CARD_BASIC_LEVEL0_1, DateMock) == 0
+    assert berenice.assess(CARD_BASIC_LEVEL0_2, DateMock) == 0
+    assert berenice.assess(CARD_BASIC_LEVEL1_1, DateMock) == 1
+    assert berenice.assess(CARD_BASIC_LEVEL2_1, DateMock) == 2
+    assert berenice.assess(CARD_BASIC_LEVEL2_2, DateMock) == 2
+    assert berenice.assess(CARD_BASIC_LEVEL2_3, DateMock) == 2
 
 def test_reviews_not_sorted():
-    #assert doreen.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
+    #assert berenice.assess(CARD_REVIEWS_NOT_SORTED, BOGUS_CURRENT_DATE) == 2
     with pytest.raises(AssertionError):
-        doreen.assess(CARD_REVIEWS_NOT_SORTED, DateMock)
+        berenice.assess(CARD_REVIEWS_NOT_SORTED, DateMock)
 
 def test_ignore_premature_right_reviews():
-    assert doreen.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, DateMock) == 1
+    assert berenice.assess(CARD_IGNORE_PREMATURE_RIGHT_REVIEWS, DateMock) == 1
 
 def test_ignore_premature_bad_reviews():
-    assert doreen.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, DateMock) == 0
+    assert berenice.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS, DateMock) == 0
 
 def test_ignore_premature_bad_reviews_yesterday():
-    assert doreen.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == 0
+    assert berenice.assess(CARD_IGNORE_PREMATURE_BAD_REVIEWS_YESTERDAY, DateMock) == berenice.GRADE_CARD_WRONG_YESTERDAY
 
 def test_ignore_future_reviews():
-    with pytest.warns(UserWarning):
-        assert doreen.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
+    assert berenice.assess(CARD_IGNORE_FUTURE_REVIEWS, DateMock) == 2
 
 def test_card_wrong_review_yesterday():
-    assert doreen.assess(CARD_WRONG_REVIEW_YESTERDAY_1, DateMock) == 0
+    assert berenice.assess(CARD_WRONG_REVIEW_YESTERDAY_1, DateMock) == berenice.GRADE_CARD_WRONG_YESTERDAY
 
 def test_card_wrong_review_today():
-    assert doreen.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == doreen.GRADE_DONT_REVIEW_THIS_CARD_TODAY
-    assert doreen.assess(CARD_NOT_TO_BE_REVIEWED_TODAY, DateMock) == doreen.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert berenice.assess(CARD_WRONG_REVIEW_TODAY, DateMock) == berenice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
+    assert berenice.assess(CARD_NOT_TO_BE_REVIEWED_TODAY, DateMock) == berenice.GRADE_DONT_REVIEW_THIS_CARD_TODAY
 
 
 ###############################################################################
@@ -728,175 +727,16 @@ def test_estimate_card_difficulty():
             TAG_DIFFICULT: POINTS_DIFFICULT
         }
 
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_NONE, tag_difficulty_dict) == POINTS_NEUTRAL
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_EASY, tag_difficulty_dict) == POINTS_EASY
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL, tag_difficulty_dict) == POINTS_NEUTRAL
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_EASY_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT_EASY, tag_difficulty_dict) == POINTS_DIFFICULT
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT_NEUTRAL, tag_difficulty_dict) == POINTS_DIFFICULT
-    assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
-    #assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_EASY_NEUTRAL, tag_difficulty_dict) == POINTS_EASY
-    #assert doreen.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_EASY, tag_difficulty_dict) == POINTS_EASY
-
-
-###############################################################################
-# TEST THE "sort_sub_list" FUNCTION                                           #
-###############################################################################
-
-TAG_LOW_PRIORITY = "low priority"
-TAG_DEFAULT_PRIORITY = "default priority"
-TAG_HIGH_PRIORITY = "high priority"
-
-POINTS_LOW_PRIORITY = -1
-POINTS_DEFAULT_PRIORITY = 0
-POINTS_HIGH_PRIORITY = 1
-
-CARD_LOW_PRIORITY_C0 = {
-        "cdate": BOGUS_CURRENT_DATE,
-        "reviews": [],
-        'tags': [TAG_LOW_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_DEFAULT_PRIORITY_C0 = {
-        "cdate": BOGUS_CURRENT_DATE,
-        "reviews": [],
-        'tags': [TAG_DEFAULT_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_HIGH_PRIORITY_C0 = {
-        "cdate": BOGUS_CURRENT_DATE,
-        "reviews": [],
-        'tags': [TAG_HIGH_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_HIGH_PRIORITY_C1 = {
-        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=1),
-        "reviews": [],
-        'tags': [TAG_HIGH_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_DEFAULT_PRIORITY_C2 = {
-        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
-        "reviews": [],
-        'tags': [TAG_DEFAULT_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_HIGH_PRIORITY_C10_R5 = {
-        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=10),
-        'reviews': [
-                {
-                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
-                    "result": WRONG_ANSWER_STR
-                },{
-                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=5),
-                    "result": WRONG_ANSWER_STR
-                }
-            ],
-        'tags': [TAG_HIGH_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_LOW_PRIORITY_C15_R2 = {
-        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=15),
-        'reviews': [
-                {
-                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=12),
-                    "result": WRONG_ANSWER_STR
-                },{
-                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=2),
-                    "result": WRONG_ANSWER_STR
-                }
-            ],
-        'tags': [TAG_LOW_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-CARD_DEFAULT_PRIORITY_C9_R6 = {
-        "cdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=9),
-        'reviews': [
-                {
-                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=8),
-                    "result": WRONG_ANSWER_STR
-                },{
-                    "rdate": BOGUS_CURRENT_DATE - datetime.timedelta(days=6),
-                    "result": WRONG_ANSWER_STR
-                }
-            ],
-        'tags': [TAG_DEFAULT_PRIORITY],
-        'hidden': False,
-        'question': 'foo',
-        'answer': 'bar'
-    }
-
-def test_sort_sub_list():
-    tag_priority_dict = {
-            TAG_LOW_PRIORITY: POINTS_LOW_PRIORITY,
-            TAG_DEFAULT_PRIORITY: POINTS_DEFAULT_PRIORITY,
-            TAG_HIGH_PRIORITY: POINTS_HIGH_PRIORITY
-        }
-
-    priorities_per_level_dict = {
-        0: [
-            {'sort_fn': 'tag', 'reverse': True},
-            {'sort_fn': 'date', 'reverse': True}
-        ],
-        'default': [
-            {'sort_fn': 'tag', 'reverse': True}
-        ]
-    }
-
-    # Estimate the priority of each card
-    for card in [CARD_LOW_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_HIGH_PRIORITY_C0,
-                 CARD_HIGH_PRIORITY_C1, CARD_DEFAULT_PRIORITY_C2,
-                 CARD_HIGH_PRIORITY_C10_R5, CARD_LOW_PRIORITY_C15_R2, CARD_DEFAULT_PRIORITY_C9_R6]:
-        card["priority"] = doreen.estimate_card_priority(card, tag_priority_dict)
-    
-    # Check that no exception is raised when sub_list is empty
-    doreen.sort_sub_list(sub_list=[], sub_list_grade=0, tag_priority_dict=tag_priority_dict, priorities_per_level=priorities_per_level_dict)
-
-    # Test that card are sorted by descending priority level when sub_list_grade is not zero
-    sub_list = [CARD_LOW_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_HIGH_PRIORITY_C0]
-    sub_list_grade = 1
-    doreen.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_level=priorities_per_level_dict)
-    assert sub_list == [CARD_HIGH_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_LOW_PRIORITY_C0]
-
-    # Test that card are sorted by last update (and by priority when cards have the same last update) when sub_list_grade is zero
-    sub_list = [CARD_DEFAULT_PRIORITY_C0, CARD_LOW_PRIORITY_C0, CARD_HIGH_PRIORITY_C0]
-    sub_list_grade = 0
-    doreen.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_level=priorities_per_level_dict)
-    assert sub_list == [CARD_HIGH_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C0, CARD_LOW_PRIORITY_C0]
-
-    # Test that card are sorted by last update when sub_list_grade is zero
-    sub_list = [CARD_LOW_PRIORITY_C0, CARD_DEFAULT_PRIORITY_C2, CARD_HIGH_PRIORITY_C1]
-    sub_list_grade = 0
-    doreen.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_level=priorities_per_level_dict)
-    assert sub_list == [CARD_LOW_PRIORITY_C0, CARD_HIGH_PRIORITY_C1, CARD_DEFAULT_PRIORITY_C2]
-
-    # Test that card are sorted by last update when sub_list_grade is zero
-    sub_list = [CARD_HIGH_PRIORITY_C10_R5, CARD_LOW_PRIORITY_C15_R2, CARD_DEFAULT_PRIORITY_C9_R6]
-    sub_list_grade = 0
-    doreen.sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_level=priorities_per_level_dict)
-    assert sub_list == [CARD_LOW_PRIORITY_C15_R2, CARD_HIGH_PRIORITY_C10_R5, CARD_DEFAULT_PRIORITY_C9_R6]
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NONE, tag_difficulty_dict) == POINTS_NEUTRAL
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_EASY, tag_difficulty_dict) == POINTS_EASY
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL, tag_difficulty_dict) == POINTS_NEUTRAL
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_EASY_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT_EASY, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_DIFFICULT_NEUTRAL, tag_difficulty_dict) == POINTS_DIFFICULT
+    assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_DIFFICULT, tag_difficulty_dict) == POINTS_DIFFICULT
+    #assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_EASY_NEUTRAL, tag_difficulty_dict) == POINTS_EASY
+    #assert berenice.estimate_card_difficulty(CARD_DIFFICULTY_NEUTRAL_EASY, tag_difficulty_dict) == POINTS_EASY
 
 
 ###############################################################################
@@ -909,7 +749,7 @@ def test_empty_card_list():
 
     Check that `professor.current_card` returns `None` on empty card lists.
     """
-    prof = doreen.ProfessorDoreen(EMPTY_CARD_LIST)
+    prof = berenice.ProfessorBerenice(EMPTY_CARD_LIST)
     assert prof.current_card == None
 
 def test_one_card_skip():
@@ -922,7 +762,7 @@ def test_one_card_skip():
     """
     card_1 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = doreen.ProfessorDoreen([card_1], date_mock=DateMock)
+    prof = berenice.ProfessorBerenice([card_1], date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_1
@@ -942,7 +782,7 @@ def test_one_card_right():
     """
     card_1 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = doreen.ProfessorDoreen([card_1], date_mock=DateMock)
+    prof = berenice.ProfessorBerenice([card_1], date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_1
@@ -965,7 +805,7 @@ def test_one_card_wrong():
     """
     card_1 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = doreen.ProfessorDoreen([card_1], date_mock=DateMock)
+    prof = berenice.ProfessorBerenice([card_1], date_mock=DateMock)
 
     current_card = prof.current_card
     assert current_card == card_1
@@ -993,7 +833,7 @@ def test_right_wrong_and_hide_reply():
     card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = doreen.ProfessorDoreen([card_level0_age5, card_level0_age4],
+    prof = berenice.ProfessorBerenice([card_level0_age5, card_level0_age4],
                                       date_mock=DateMock)
 
     current_card = prof.current_card
@@ -1027,7 +867,7 @@ def test_hide_cards():
     card_level0_age5 = copy.deepcopy(CARD_BASIC_LEVEL0_2)
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
 
-    prof = doreen.ProfessorDoreen([card_level0_age5, card_level0_age4],
+    prof = berenice.ProfessorBerenice([card_level0_age5, card_level0_age4],
                                       date_mock=DateMock)
 
     current_card = prof.current_card
@@ -1055,7 +895,7 @@ def test_one_hidden_card():
     - `professor.current_card` returns `None` when card lists contains hidden
       cards only.
     """
-    prof = doreen.ProfessorDoreen(copy.deepcopy(ONE_HIDDEN_CARD))
+    prof = berenice.ProfessorBerenice(copy.deepcopy(ONE_HIDDEN_CARD))
     assert prof.current_card == None
 
 def test_three_cards_two_hidden():
@@ -1070,7 +910,7 @@ def test_three_cards_two_hidden():
     card_2 = copy.deepcopy(CARD_BASIC_LEVEL2_1)
     card_3 = copy.deepcopy(CARD_HIDDEN)
 
-    prof = doreen.ProfessorDoreen([card_1, card_2, card_3],
+    prof = berenice.ProfessorBerenice([card_1, card_2, card_3],
                                       date_mock=DateMock)
     
     current_card = prof.current_card
@@ -1081,7 +921,7 @@ def test_three_cards_two_hidden():
     assert current_card == None
 
 
-def test_max_cards_per_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to be consistent with Doreen's policy with grade 0
+def test_max_cards_per_grade():
     """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
@@ -1106,7 +946,7 @@ def test_max_cards_per_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to
             card_level0_age3,
         ]
     
-    prof = doreen.ProfessorDoreen(card_list,
+    prof = berenice.ProfessorBerenice(card_list,
                                       date_mock=DateMock,
                                       max_cards_per_grade=3)
 
@@ -1127,7 +967,7 @@ def test_max_cards_per_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to
     prof.current_card_reply(answer=WRONG_ANSWER_STR)
 
     current_card = prof.current_card
-    assert current_card == card_level0_age3
+    assert current_card == card_level0_age4
     prof.current_card_reply(answer=RIGHT_ANSWER_STR)
 
     ###
@@ -1136,7 +976,7 @@ def test_max_cards_per_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to
     assert current_card == None
 
 
-def test_init_right_answer_current_grade():  # TODO: change rdates in CARD_BASIC_LEVEL0_X to be consistent with Doreen's policy with grade 0
+def test_init_right_answer_current_grade():
     """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
@@ -1157,8 +997,8 @@ def test_init_right_answer_current_grade():  # TODO: change rdates in CARD_BASIC
     card_level0_age4 = copy.deepcopy(CARD_BASIC_LEVEL0_1)
     card_level0_age3 = copy.deepcopy(CARD_BASIC_LEVEL0_4)
 
-    assert doreen.assess(card_reviewed_today_right_age6, date_mock=DateMock, ignore_today_answers=True) == 0
-    assert doreen.assess(card_reviewed_today_right_age1, date_mock=DateMock, ignore_today_answers=True) == 0
+    assert berenice.assess(card_reviewed_today_right_age6, date_mock=DateMock, ignore_today_answers=True) == 0
+    assert berenice.assess(card_reviewed_today_right_age1, date_mock=DateMock, ignore_today_answers=True) == berenice.GRADE_CARD_NEVER_REVIEWED
 
     card_list = [
             card_reviewed_today_right_age6,
@@ -1172,7 +1012,7 @@ def test_init_right_answer_current_grade():  # TODO: change rdates in CARD_BASIC
             card_level0_age3,
         ]
 
-    prof = doreen.ProfessorDoreen(card_list,
+    prof = berenice.ProfessorBerenice(card_list,
                                       date_mock=DateMock,
                                       max_cards_per_grade=4)
 
@@ -1205,7 +1045,7 @@ def test_switch_grade_min2():
     """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
 
     Check that:
-    - `professor.switch_grade` switch from level -2 to level 1 and from level -1 to level 1 ;
+    - `professor.switch_grade` switch from level -2 to level 1 and from level GRADE_CARD_NEVER_REVIEWED to level 1 ;
     """
     card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
     card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)
@@ -1236,7 +1076,7 @@ def test_switch_grade_min2():
             card_level1_age10,
         ]
 
-    prof = doreen.ProfessorDoreen(card_list,
+    prof = berenice.ProfessorBerenice(card_list,
                                       date_mock=DateMock,
                                       max_cards_per_grade=2)
 
@@ -1295,7 +1135,7 @@ def test_switch_grade_min1():
             card_level1_age10,
         ]
 
-    prof = doreen.ProfessorDoreen(card_list,
+    prof = berenice.ProfessorBerenice(card_list,
                                       date_mock=DateMock,
                                       max_cards_per_grade=2)
 
@@ -1391,10 +1231,9 @@ def test_several_cards():
             card_level2_age10,
         ]
 
-    with pytest.warns(UserWarning):  # 'card_level2_age12' raises a UserWarning as it consains a rdate defined in the future
-        prof = doreen.ProfessorDoreen(card_list,
-                                    date_mock=DateMock,
-                                    max_cards_per_grade=3)
+    prof = berenice.ProfessorBerenice(card_list,
+                                      date_mock=DateMock,
+                                      max_cards_per_grade=3)
 
     current_card = prof.current_card
     assert current_card == card_level_min2_age8

@@ -1,5 +1,5 @@
 """Ralph randomly pick cards. No matter the answer, each card is put back in the stack (i.e. "draw with replacement").
-This professor is used for intermediate-term memory training.
+This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 """
 
 from opencal.core.professor.professor import AbstractProfessor

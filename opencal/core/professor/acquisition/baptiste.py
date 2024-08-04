@@ -1,6 +1,6 @@
 """Professor Arthur randomly pick cards in an "active set".
 For each right answer, the card is removed.
-This professor is used for intermediate-term memory training.
+This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 
 Version plus simple d'Arthur.
 Chaque fois qu'une carte dépasse le seuil de score,

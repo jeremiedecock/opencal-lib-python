@@ -1,6 +1,6 @@
 import datetime
 import opencal
-from opencal.io.sqlitedb import ITM_REVIEW_TABLE_NAME
+from opencal.io.sqlitedb import ACQUISITION_REVIEW_TABLE_NAME
 import sqlite3
 import warnings
 
@@ -62,7 +62,7 @@ class AbstractProfessor:
             "is_right_answer": is_right_answer
         }
 
-        sql_request = f"""INSERT INTO {ITM_REVIEW_TABLE_NAME}
+        sql_request = f"""INSERT INTO {ACQUISITION_REVIEW_TABLE_NAME}
         ( card_id,  review_datetime,  review_duration_ms,  is_right_answer) VALUES
         (:card_id, :review_datetime, :review_duration_ms, :is_right_answer)
         """

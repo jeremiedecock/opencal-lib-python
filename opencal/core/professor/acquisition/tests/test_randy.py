@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains unit tests for the "opencal.core.professor.itm.randy" module.
+This module contains unit tests for the "opencal.core.professor.acquisition.randy" module.
 """
 
-from opencal.core.professor.itm import randy
+from opencal.core.professor.acquisition import randy
 
 import datetime
 import random

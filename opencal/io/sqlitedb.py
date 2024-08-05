@@ -382,7 +382,7 @@ def create_acquisition_review_table(opencal_db_path: os.PathLike) -> None:
         id                   INTEGER PRIMARY KEY AUTOINCREMENT,
         card_id              INTEGER NOT NULL,
         review_datetime      TEXT DEFAULT CURRENT_TIMESTAMP,
-        review_duration_ms   INTEGER NOT NULL,
+        review_duration_ms   INTEGER,
         is_right_answer      INTEGER NOT NULL,
         FOREIGN KEY(card_id) REFERENCES {CARD_TABLE_NAME}(id)
     )"""

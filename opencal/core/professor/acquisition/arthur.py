@@ -3,13 +3,13 @@ For each right answer, the card is removed.
 This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 """
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 DEFAULT_CARDS_IN_PROGRESS_INCREMENT_SIZE = 5
 DEFAULT_RIGHT_ANSWERS_RATE_THRESHOLD = 0.5
 
-class ProfessorArthur(AbstractProfessor):
+class ProfessorArthur(AbstractAcquisitionProfessor):
 
     def __init__(self, card_list, cards_in_progress_increment_size=DEFAULT_CARDS_IN_PROGRESS_INCREMENT_SIZE, right_answers_rate_threshold=DEFAULT_RIGHT_ANSWERS_RATE_THRESHOLD):
         super().__init__()
@@ -49,6 +49,7 @@ class ProfessorArthur(AbstractProfessor):
 
 
     def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+
         if len(self._cards_in_progress_list) > 0:
             # Pick the first card in progress
             (card_index, card) = self._cards_in_progress_list.pop(0)
@@ -62,6 +63,16 @@ class ProfessorArthur(AbstractProfessor):
                 print(".", end='', flush=True)
             else:
                 raise ValueError(f"Unknown answer : {answer}")
+
+            # Save the reply in the SQL database
+            if answer in (RIGHT_ANSWER_STR, WRONG_ANSWER_STR):
+                is_right_answer = answer == RIGHT_ANSWER_STR
+                review_duration_ms = duration if duration is not None else -1   # TODO ?
+                self.save_current_card_reply(
+                    card=card,
+                    review_duration_ms=review_duration_ms,
+                    is_right_answer=is_right_answer
+                )
 
 
     def update_card_list(self, card_list):

@@ -3,12 +3,12 @@ For each right answer, the card is removed.
 This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 """
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 CARDS_IN_PROGRESS_INCREMENT_SIZE = 5
 
-class ProfessorDenis(AbstractProfessor):
+class ProfessorDenis(AbstractAcquisitionProfessor):
 
     def __init__(self, card_list, cards_in_progress_increment_size=CARDS_IN_PROGRESS_INCREMENT_SIZE):
         super().__init__()

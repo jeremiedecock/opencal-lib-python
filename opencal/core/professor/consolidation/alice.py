@@ -6,7 +6,7 @@ import copy
 import datetime
 import math
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.consolidation.professor import AbstractConsolidationProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 GRADE_CARD_NEVER_REVIEWED = -1
@@ -18,7 +18,7 @@ DEBUG = False
 if DEBUG:
     import hashlib
 
-class ProfessorAlice(AbstractProfessor):
+class ProfessorAlice(AbstractConsolidationProfessor):
 
     def __init__(self, card_list, date_mock=None):
         super().__init__()

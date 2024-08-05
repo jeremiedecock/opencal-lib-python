@@ -25,7 +25,7 @@ Ce score sert à 2 choses:
 
 import random
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 ACTIVE_SET_SIZE = 3
@@ -35,7 +35,7 @@ WIDENING_THRESHOLD = 3 # 1.
 # TODO : passer les 3 constantes prec dans le fichier de config YAML
 # TODO : pondérer le poids des réponses dans le score des cartes (facteur d'escompte)
 
-class ProfessorCharles(AbstractProfessor):
+class ProfessorCharles(AbstractAcquisitionProfessor):
 
     def __init__(self, card_list):
         super().__init__()

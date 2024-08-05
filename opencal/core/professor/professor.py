@@ -47,26 +47,3 @@ class AbstractProfessor:
 
     def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
         raise NotImplementedError()
-    
-    ###################################
-
-    def save_current_card_reply(self, review_duration_ms, is_right_answer):
-        """Save the reply in the database"""
-
-        card_id = 0    # TODO... SQL SELECT...
-
-        sql_request_values_dict = {
-            "card_id": card_id,
-            "review_datetime": datetime.datetime.now(),
-            "review_duration_ms": review_duration_ms,
-            "is_right_answer": is_right_answer
-        }
-
-        sql_request = f"""INSERT INTO {ACQUISITION_REVIEW_TABLE_NAME}
-        ( card_id,  review_datetime,  review_duration_ms,  is_right_answer) VALUES
-        (:card_id, :review_datetime, :review_duration_ms, :is_right_answer)
-        """
-
-        # This is the qmark style:
-        self.cur.execute(sql_request, sql_request_values_dict)
-        self.con.commit()

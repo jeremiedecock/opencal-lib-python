@@ -5,10 +5,10 @@ This teacher is used for the acquisition (or "learning phase"), i.e. the initial
 import copy
 import random
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
-class ProfessorRandy(AbstractProfessor):
+class ProfessorRandy(AbstractAcquisitionProfessor):
 
     def __init__(self, card_list):
         super().__init__()

@@ -2,10 +2,10 @@
 This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 """
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 import random
 
-class ProfessorRalph(AbstractProfessor):
+class ProfessorRalph(AbstractAcquisitionProfessor):
 
     def __init__(self, card_list):
         super().__init__()

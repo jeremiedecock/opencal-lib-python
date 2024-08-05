@@ -10,7 +10,7 @@ une nouvelle carte.
 
 import random
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 ACTIVE_SET_SIZE = 5
@@ -19,7 +19,7 @@ SCORE_THRESHOLD = REVIEWS_HORIZON
 
 # TODO : passer les 3 constantes prec dans le fichier de config YAML
 
-class ProfessorBaptiste(AbstractProfessor):
+class ProfessorBaptiste(AbstractAcquisitionProfessor):
 
     def __init__(self, card_list):
         super().__init__()

@@ -8,7 +8,7 @@ import warnings
 
 from typing import Optional, Union
 
-from opencal.core.professor.professor import AbstractProfessor
+from opencal.core.professor.consolidation.professor import AbstractConsolidationProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
 
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -1
@@ -21,7 +21,7 @@ DEFAULT_DIFFICULTY = 1.
 
 VERBOSE = True
 
-class ProfessorDoreen(AbstractProfessor):
+class ProfessorDoreen(AbstractConsolidationProfessor):
 
     def __init__(self,
                  card_list: list,

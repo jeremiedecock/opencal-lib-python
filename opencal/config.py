@@ -18,8 +18,8 @@ opencal:
     # The directory containing assets (images, video, audio, ...) stored in the database
     db_assets_path: "~/.opencal/assets"
 
-    db_backup_path: "~/data_opencal"
-    db_json_export_path: "~/.opencal_db.json"
+    sqlite_backup_dir_path: "~/data_opencal"
+    sqlite_dump_file_path: "~/data_opencal/opencal.sql"
 
     # Unique key of the shared memory used to prevent more than one instance of the application
     shm_key: "{ ''.join(random.choice(string.ascii_letters) for _ in range(16)) }"

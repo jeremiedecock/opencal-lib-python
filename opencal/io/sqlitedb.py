@@ -446,7 +446,7 @@ def backup_db(
 
 def dump_db(
         opencal_db_path: os.PathLike,
-        dump_dir_path: os.PathLike
+        dump_file_path: os.PathLike
     ) -> None:
     """
     Dump the SQLite database to a SQL file.
@@ -458,15 +458,15 @@ def dump_db(
     ----------
     opencal_db_path : os.PathLike
         The path to the SQLite database file to be dumped.
-    dump_dir_path : os.PathLike
-        The path to the directory where the dump file will be saved.
+    dump_file_path : os.PathLike
+        The path to the SQL dump file (plain text file) will be saved.
 
     Returns
     -------
     None
     """
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
-    dump_file_path = os.path.join(opencal.path.expand_path(dump_dir_path), "opencal.sql")
+    dump_file_path = opencal.path.expand_path(dump_file_path)
 
     con = sqlite3.connect(opencal_db_path)
 
@@ -481,7 +481,8 @@ def dump_db(
 
 def restore_db(
         opencal_db_path: os.PathLike,
-        dump_dir_path: os.PathLike
+        dump_file_path: os.PathLike,
+        backup_dir_path: os.PathLike
     ) -> None:
     """
     Restore the SQLite database from a SQL dump file.
@@ -494,19 +495,25 @@ def restore_db(
     ----------
     opencal_db_path : os.PathLike
         The path to the SQLite database file to be restored.
-    dump_dir_path : os.PathLike
-        The path to the directory where the dump file is located.
+    dump_file_path : os.PathLike
+        The path to the SQL dump file (plain text file) to restore.
+    backup_dir_path : os.PathLike
+        The path to the directory where the backup SQLite (binary) file will be saved.
 
     Returns
     -------
     None
     """
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
-    dump_file_path = os.path.join(opencal.path.expand_path(dump_dir_path), "opencal.sql")
+    dump_file_path = opencal.path.expand_path(dump_file_path)
 
     # Backup the original database if it exists
     if os.path.exists(opencal_db_path):
-        backup_db(prefix="before_restore_")
+        backup_db(
+            opencal_db_path=opencal_db_path,
+            backup_dir_path=backup_dir_path,
+            prefix="before_restore_"
+        )
         print("Backup created")
 
     con = sqlite3.connect(opencal_db_path)

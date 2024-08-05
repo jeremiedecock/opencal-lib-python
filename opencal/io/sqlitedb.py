@@ -66,21 +66,21 @@ def save_pkb(
         # Card ########################
 
         cdate = card_dict["cdate"]
-        hidden = card_dict["hidden"]
+        is_hidden = card_dict["hidden"]
         question = card_dict["question"]      #.strip() # remove strip() because it generates fake differences with the original XML file
         answer = card_dict.get("answer", "")  #.strip()
         tag_list = card_dict["tags"]
         review_list = card_dict["reviews"]
 
-        assert hidden in (True, False)
-        hidden = int(hidden)
+        assert is_hidden in (True, False)
+        is_hidden = int(is_hidden)
 
         tags_str = "\n".join(tag_list)
 
         sql_card_table_insert_params.append({
             "id": int(card_id),
-            "creation_date": cdate.strftime(PY_DATE_FORMAT),
-            "hidden": hidden,
+            "creation_datetime": cdate.strftime(PY_DATE_FORMAT),
+            "is_hidden": is_hidden,
             "question": question,
             "answer": answer,
             "tags": tags_str
@@ -96,13 +96,18 @@ def save_pkb(
             review_date = review["rdate"]
             result = review["result"]
 
-            assert result in ('good','bad')
+            if result == 'good':
+                is_right_answer = True
+            elif result == 'bad':
+                is_right_answer = False
+            else:
+                raise ValueError(f'Unknown result value "{result}" for consolidation review {review_id}')
 
             sql_review_table_insert_params.append({
                 "id": int(review_id),
                 "card_id": card_id,
-                "review_date": review_date.strftime(PY_DATE_FORMAT),
-                "result": result
+                "review_datetime": review_date.strftime(PY_DATE_FORMAT),
+                "is_right_answer": is_right_answer
             })
 
     # INSERT SQL DATA INTO THE CARD TABLE #####################################
@@ -111,8 +116,8 @@ def save_pkb(
     cur = con.cursor()
 
     sql_request = f"""INSERT INTO {CARD_TABLE_NAME}
-    ( id,  creation_date,  hidden,  question,  answer,  tags) VALUES
-    (:id, :creation_date, :hidden, :question, :answer, :tags)
+    ( id,  creation_datetime,  is_hidden,  question,  answer,  tags) VALUES
+    (:id, :creation_datetime, :is_hidden, :question, :answer, :tags)
     """
 
     cur.executemany(sql_request, sql_card_table_insert_params)
@@ -120,8 +125,8 @@ def save_pkb(
     # INSERT SQL DATA INTO THE REVIEW TABLE #####
 
     sql_request = f"""INSERT INTO {CONSOLIDATION_REVIEW_TABLE_NAME}
-    ( id,  card_id,  review_date,  result) VALUES
-    (:id, :card_id, :review_date, :result)
+    ( id,  card_id,  review_datetime,  is_right_answer) VALUES
+    (:id, :card_id, :review_datetime, :is_right_answer)
     """
 
     cur.executemany(sql_request, sql_review_table_insert_params)
@@ -168,7 +173,7 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
 
     cards_dict: Dict[int, Dict[str, Any]] = {}   # A dictionary containing all the cards
 
-    sql_query_str = f"SELECT id, creation_date, hidden, question, answer, tags FROM {CARD_TABLE_NAME} ORDER BY id"
+    sql_query_str = f"SELECT id, creation_datetime, is_hidden, question, answer, tags FROM {CARD_TABLE_NAME} ORDER BY id"
 
     # For each card in the database
     for row in cur.execute(sql_query_str):
@@ -200,17 +205,17 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
 
     # LOAD REVIEWS ####################
 
-    sql_query_str = f"SELECT id, card_id, review_date, result FROM {CONSOLIDATION_REVIEW_TABLE_NAME} ORDER BY review_date"
+    sql_query_str = f"SELECT id, card_id, review_datetime, is_right_answer FROM {CONSOLIDATION_REVIEW_TABLE_NAME} ORDER BY review_datetime"
 
     # For each *consolidation review* in the database
     for row in cur.execute(sql_query_str):
-        review_id, card_id, review_date_str, result = row
+        review_id, card_id, review_date_str, is_right_answer = row
 
         review_date = datetime.datetime.strptime(review_date_str, PY_DATE_FORMAT) #.date()
 
         review_dict = {
             "rdate": review_date,
-            "result": result
+            "result": "good" if is_right_answer else "bad"
         }
 
         cards_dict[card_id]["reviews"].append(review_dict)
@@ -308,12 +313,12 @@ def create_card_table(opencal_db_path: os.PathLike) -> None:
     print(f"Creating table {CARD_TABLE_NAME}...")
 
     sql_query_str = f"""CREATE TABLE {CARD_TABLE_NAME} (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
-        creation_date   TEXT DEFAULT CURRENT_TIMESTAMP,
-        hidden          INTEGER DEFAULT 0,
-        question        TEXT NOT NULL,
-        answer          TEXT,
-        tags            TEXT NOT NULL
+        id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+        creation_datetime  TEXT DEFAULT CURRENT_TIMESTAMP,
+        is_hidden          INTEGER DEFAULT 0,
+        question           TEXT NOT NULL,
+        answer             TEXT,
+        tags               TEXT NOT NULL
     )"""
 
     cur.execute(sql_query_str)
@@ -344,11 +349,12 @@ def create_consolidation_review_table(opencal_db_path: os.PathLike) -> None:
     print(f"Creating table {CONSOLIDATION_REVIEW_TABLE_NAME}...")
 
     sql_query_str = f"""CREATE TABLE {CONSOLIDATION_REVIEW_TABLE_NAME} (
-        id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-        card_id              INTEGER NOT NULL,
-        review_date          TEXT DEFAULT CURRENT_TIMESTAMP,
-        result               TEXT CHECK( result IN ('good','bad') ) NOT NULL,
-        FOREIGN KEY(card_id) REFERENCES {CARD_TABLE_NAME}(id)
+        id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+        card_id                INTEGER NOT NULL,
+        review_datetime        TEXT DEFAULT CURRENT_TIMESTAMP,
+        user_response_time_ms  INTEGER,
+        is_right_answer        INTEGER NOT NULL,
+        FOREIGN KEY(card_id)   REFERENCES {CARD_TABLE_NAME}(id)
     )"""
 
     cur.execute(sql_query_str)
@@ -379,12 +385,12 @@ def create_acquisition_review_table(opencal_db_path: os.PathLike) -> None:
     print(f"Creating table {ACQUISITION_REVIEW_TABLE_NAME}...")
 
     sql_query_str = f"""CREATE TABLE {ACQUISITION_REVIEW_TABLE_NAME} (
-        id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-        card_id                 INTEGER NOT NULL,
-        review_datetime         TEXT DEFAULT CURRENT_TIMESTAMP,
-        user_response_time_ms   INTEGER,
-        is_right_answer         INTEGER NOT NULL,
-        FOREIGN KEY(card_id)    REFERENCES {CARD_TABLE_NAME}(id)
+        id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+        card_id                INTEGER NOT NULL,
+        review_datetime        TEXT DEFAULT CURRENT_TIMESTAMP,
+        user_response_time_ms  INTEGER,
+        is_right_answer        INTEGER NOT NULL,
+        FOREIGN KEY(card_id)   REFERENCES {CARD_TABLE_NAME}(id)
     )"""
 
     cur.execute(sql_query_str)

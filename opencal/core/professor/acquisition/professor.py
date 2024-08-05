@@ -44,21 +44,21 @@ class AbstractAcquisitionProfessor(AbstractProfessor):
 
         # Retrieve the card ID ##################
 
-        hidden = card["hidden"]
-        assert hidden in (True, False)
-        hidden = int(hidden)
+        is_hidden = card["hidden"]
+        assert is_hidden in (True, False)
+        is_hidden = int(is_hidden)
 
         tag_list = card["tags"]
         tags_str = "\n".join(tag_list)
 
-        sql_query = f"SELECT id FROM {CARD_TABLE_NAME} WHERE creation_date=? AND question=? AND answer=? AND hidden=? AND tags=?"
-        self.cur.execute(sql_query, (card['cdate'].strftime(PY_DATE_FORMAT), card['question'], card['answer'], hidden, tags_str))
+        sql_query = f"SELECT id FROM {CARD_TABLE_NAME} WHERE creation_datetime=? AND question=? AND answer=? AND is_hidden=? AND tags=?"
+        self.cur.execute(sql_query, (card['cdate'].strftime(PY_DATE_FORMAT), card['question'], card['answer'], is_hidden, tags_str))
         rows = self.cur.fetchall()
 
         if rows:
             card_id = rows[0][0]
             if len(rows) > 1:
-                warnings.warn("More than one record found for the (creation_date, question, answer, hidden, tags) tuple.")
+                warnings.warn("More than one record found for the (creation_datetime, question, answer, is_hidden, tags) tuple.")
         else:
             raise ValueError("No card ID found in the database.")
 

@@ -399,8 +399,8 @@ def create_acquisition_review_table(opencal_db_path: os.PathLike) -> None:
 
 
 def backup_db(
-        opencal_db_path: os.PathLike,
-        backup_dir_path: os.PathLike,
+        opencal_db_path: Optional[os.PathLike] = None,
+        backup_dir_path: Optional[os.PathLike] = None,
         prefix: str = ""
     ) -> None:
     """
@@ -425,6 +425,11 @@ def backup_db(
     """
     today_str = datetime.datetime.now().strftime(r"%Y-%m-%d")
 
+    if opencal_db_path is None:
+        opencal_db_path = opencal.cfg['opencal']['db_path']
+    if backup_dir_path is None:
+        backup_dir_path = opencal.cfg['opencal']['sqlite_backup_dir_path']
+
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
     backup_file_path = os.path.join(opencal.path.expand_path(backup_dir_path), prefix + today_str + "_opencal.sqlite")
 
@@ -445,8 +450,8 @@ def backup_db(
 
 
 def dump_db(
-        opencal_db_path: os.PathLike,
-        dump_file_path: os.PathLike
+        opencal_db_path: Optional[os.PathLike] = None,
+        dump_file_path: Optional[os.PathLike] = None
     ) -> None:
     """
     Dump the SQLite database to a SQL file.
@@ -465,6 +470,11 @@ def dump_db(
     -------
     None
     """
+    if opencal_db_path is None:
+        opencal_db_path = opencal.cfg['opencal']['db_path']
+    if dump_file_path is None:
+        dump_file_path = opencal.cfg['opencal']['sqlite_dump_file_path']
+
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
     dump_file_path = opencal.path.expand_path(dump_file_path)
 
@@ -480,9 +490,9 @@ def dump_db(
 
 
 def restore_db(
-        opencal_db_path: os.PathLike,
-        dump_file_path: os.PathLike,
-        backup_dir_path: os.PathLike
+        opencal_db_path: Optional[os.PathLike] = None,
+        dump_file_path: Optional[os.PathLike] = None,
+        backup_dir_path: Optional[os.PathLike] = None
     ) -> None:
     """
     Restore the SQLite database from a SQL dump file.
@@ -504,8 +514,16 @@ def restore_db(
     -------
     None
     """
+    if opencal_db_path is None:
+        opencal_db_path = opencal.cfg['opencal']['db_path']
+    if dump_file_path is None:
+        dump_file_path = opencal.cfg['opencal']['sqlite_dump_file_path']
+    if backup_dir_path is None:
+        backup_dir_path = opencal.cfg['opencal']['sqlite_backup_dir_path']
+
     opencal_db_path = opencal.path.expand_path(opencal_db_path)
     dump_file_path = opencal.path.expand_path(dump_file_path)
+    backup_dir_path = opencal.path.expand_path(backup_dir_path)
 
     # Backup the original database if it exists
     if os.path.exists(opencal_db_path):

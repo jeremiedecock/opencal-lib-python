@@ -25,8 +25,11 @@ version = "3.6.0"
 # [project.optional-dependencies]
 # numba = ["numba"]
 
-# [project.scripts]
+[project.scripts]
 # opencal = "opcgui.qt.main:main"
+opencal-backup = "opencal.io.sqlitedb:backup_db"
+opencal-dump = "opencal.io.sqlitedb:dump_db"
+opencal-restore = "opencal.io.sqlitedb:restore_db"
 
 # See https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
 [tool.setuptools]

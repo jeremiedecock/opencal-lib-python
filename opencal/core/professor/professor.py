@@ -2,6 +2,7 @@ import datetime
 import opencal
 from opencal.io.sqlitedb import ACQUISITION_REVIEW_TABLE_NAME
 import sqlite3
+from typing import Optional
 import warnings
 
 class AbstractProfessor:
@@ -41,9 +42,34 @@ class AbstractProfessor:
     def current_card(self):
         raise NotImplementedError()
 
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
+        raise NotImplementedError()
+
     @property
     def remaining_cards(self):
         return float("inf")      # Some professor may ask the same questions for an infinite (or unpredictable) number of times
-
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
-        raise NotImplementedError()

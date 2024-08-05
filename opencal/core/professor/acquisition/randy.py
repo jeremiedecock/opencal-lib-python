@@ -7,6 +7,7 @@ import random
 
 from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
+from typing import Optional
 
 class ProfessorRandy(AbstractAcquisitionProfessor):
 
@@ -22,7 +23,33 @@ class ProfessorRandy(AbstractAcquisitionProfessor):
     def current_card(self):
         return self._card_list[0] if len(self._card_list) > 0 else None
 
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
+
         if len(self._card_list) > 0:
             card = self._card_list.pop(0)
 
@@ -35,5 +62,9 @@ class ProfessorRandy(AbstractAcquisitionProfessor):
             else:
                 raise ValueError(f"Unknown answer : {answer}")
 
-    def update_card_list(self, card_list):
-        self._card_list = [card for card in card_list if not card["hidden"]]
+    def update_card_list(
+            self,
+            card_list: list,
+            review_hidden_cards: bool = False
+        ):
+        self._card_list = [card for card in card_list if ((not card["hidden"]) or review_hidden_cards)]

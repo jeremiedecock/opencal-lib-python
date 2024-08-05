@@ -11,6 +11,7 @@ from typing import Optional, Union
 
 from opencal.core.professor.consolidation.professor import AbstractConsolidationProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
+from typing import Optional
 
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -1
 GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER = -2
@@ -87,10 +88,10 @@ class ProfessorCelia(AbstractConsolidationProfessor):
                     if grade not in self.num_right_answers_per_grade:
                         self.num_right_answers_per_grade[grade] = 0
 
-        self.switch_grade()
+        self._switch_grade_loop()
 
 
-    def switch_grade(self):
+    def _switch_grade_loop(self):
         # TODO: smelly code...
         self._switch_grade()
 
@@ -113,18 +114,18 @@ class ProfessorCelia(AbstractConsolidationProfessor):
     @property
     def current_card(self):
         if VERBOSE:
-            self.print_number_of_cards_to_review_per_grade()
+            self._print_number_of_cards_to_review_per_grade()
 
         # Switch to the next grade if the card sub list of the current grade is empty
         # or if the current grade's quotas has been reached
         if self.current_sub_list is not None:
             if len(self.current_sub_list) == 0 or self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade:
-                self.switch_grade()
+                self._switch_grade_loop()
 
         return self.current_sub_list[0] if self.current_sub_list is not None else None
 
 
-    def print_number_of_cards_to_review_per_grade(self):
+    def _print_number_of_cards_to_review_per_grade(self):
         for k, v in sorted(self.num_right_answers_per_grade.items(), key=lambda item: item[0]):
             if k == self.current_grade:
                 num_cards  = len(self.current_sub_list)
@@ -135,7 +136,32 @@ class ProfessorCelia(AbstractConsolidationProfessor):
         print("---")
 
 
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
         if len(self.current_sub_list) > 0:
             card = self.current_sub_list.pop(0)
 

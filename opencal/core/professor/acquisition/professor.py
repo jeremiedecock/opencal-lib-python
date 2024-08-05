@@ -1,30 +1,39 @@
 import datetime
 from opencal.core.professor.professor import AbstractProfessor
 from opencal.io.sqlitedb import ACQUISITION_REVIEW_TABLE_NAME, CARD_TABLE_NAME, PY_DATE_FORMAT
+from typing import Optional
 
 class AbstractAcquisitionProfessor(AbstractProfessor):
+
+    def update_card_list(
+            self,
+            card_list: list,
+            review_hidden_cards: bool = False
+        ):
+        raise NotImplementedError()
+
 
     def save_current_card_reply(
         self,
         card: dict,
-        review_duration_ms: int,
-        is_right_answer: bool
+        is_right_answer: bool,
+        user_response_time_ms: Optional[int] = None
     ) -> None:
         """
         Save the current card reply in the database.
 
         This function saves the reply for the current card being reviewed into
         the database. It records the card ID, the review date and time, the 
-        duration of the review, and whether the answer was correct.
+        user's response time (in milliseconds), and whether the answer was correct.
 
         Parameters
         ----------
         card : dict
             The card being reviewed.
-        review_duration_ms : int
-            The duration of the review in milliseconds.
         is_right_answer : bool
             A boolean indicating whether the answer was correct.
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
 
         Returns
         -------
@@ -61,13 +70,13 @@ class AbstractAcquisitionProfessor(AbstractProfessor):
         sql_request_values_dict = {
             "card_id": card_id,
             "review_datetime": current_datetime_str,
-            "review_duration_ms": review_duration_ms,
+            "user_response_time_ms": user_response_time_ms,
             "is_right_answer": is_right_answer
         }
 
         sql_request = f"""INSERT INTO {ACQUISITION_REVIEW_TABLE_NAME}
-        ( card_id,  review_datetime,  review_duration_ms,  is_right_answer) VALUES
-        (:card_id, :review_datetime, :review_duration_ms, :is_right_answer)
+        ( card_id,  review_datetime,  user_response_time_ms,  is_right_answer) VALUES
+        (:card_id, :review_datetime, :user_response_time_ms, :is_right_answer)
         """
 
         # This is the qmark style:

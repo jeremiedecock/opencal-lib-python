@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 from opencal.core.professor.consolidation.professor import AbstractConsolidationProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
+from typing import Optional
 
 GRADE_CARD_NEVER_REVIEWED = -1
 GRADE_CARD_WRONG_YESTERDAY = -2
@@ -89,10 +90,10 @@ class ProfessorBerenice(AbstractConsolidationProfessor):
             # Sort level 0 cards by ascending (actual) grade : GRADE_CARD_WRONG_YESTERDAY < GRADE_CARD_NEVER_REVIEWED < GRADE 0
             self._card_list_dict[0].sort(key=lambda item: item["grade"])
 
-        self.switch_grade()
+        self._switch_grade_loop()
 
 
-    def switch_grade(self):
+    def _switch_grade_loop(self):
         # TODO: smelly code...
         self._switch_grade()
 
@@ -130,12 +131,38 @@ class ProfessorBerenice(AbstractConsolidationProfessor):
 
         if self.current_sub_list is not None:
             if len(self.current_sub_list) == 0 or self.num_right_answers_per_grade[self.current_grade] >= self.max_cards_per_grade:
-                self.switch_grade()
+                self._switch_grade_loop()
 
         return self.current_sub_list[0] if self.current_sub_list is not None else None
 
 
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
+
         if len(self.current_sub_list) > 0:
             card = self.current_sub_list.pop(0)
 

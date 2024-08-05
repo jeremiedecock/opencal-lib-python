@@ -5,6 +5,7 @@ This teacher is used for the acquisition (or "learning phase"), i.e. the initial
 
 from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
+from typing import Optional
 
 DEFAULT_CARDS_IN_PROGRESS_INCREMENT_SIZE = 5
 DEFAULT_RIGHT_ANSWERS_RATE_THRESHOLD = 0.5
@@ -48,7 +49,32 @@ class ProfessorArthur(AbstractAcquisitionProfessor):
         return self._cards_in_progress_list[0][1]
 
 
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
 
         if len(self._cards_in_progress_list) > 0:
             # Pick the first card in progress
@@ -67,18 +93,21 @@ class ProfessorArthur(AbstractAcquisitionProfessor):
             # Save the reply in the SQL database
             if answer in (RIGHT_ANSWER_STR, WRONG_ANSWER_STR):
                 is_right_answer = answer == RIGHT_ANSWER_STR
-                review_duration_ms = duration if duration is not None else -1   # TODO ?
                 self.save_current_card_reply(
                     card=card,
-                    review_duration_ms=review_duration_ms,
-                    is_right_answer=is_right_answer
+                    is_right_answer=is_right_answer,
+                    user_response_time_ms=user_response_time_ms
                 )
 
 
-    def update_card_list(self, card_list):
-        self._cards_not_yet_reviewed_list = [(card_index, card) for (card_index, card) in enumerate(card_list) if not card["hidden"]]
+    def update_card_list(
+            self,
+            card_list: list,
+            review_hidden_cards: bool = False
+        ):
+        self._cards_not_yet_reviewed_list = [(card_index, card) for (card_index, card) in enumerate(card_list) if ((not card["hidden"]) or review_hidden_cards)]
         self._cards_in_progress_list = []
-        self._num_right_answers = [0 for card in card_list if not card["hidden"]]          # the total number of right answers for each card
-        self._num_wrong_answers = [0 for card in card_list if not card["hidden"]]          # the total number of wrong answers for each card
+        self._num_right_answers = [0 for card in card_list if ((not card["hidden"]) or review_hidden_cards)]          # the total number of right answers for each card
+        self._num_wrong_answers = [0 for card in card_list if ((not card["hidden"]) or review_hidden_cards)]          # the total number of wrong answers for each card
         self._last_card_in_progress_index = 0
         print(f"Review {len(card_list)} cards")

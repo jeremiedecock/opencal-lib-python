@@ -27,6 +27,7 @@ import random
 
 from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
+from typing import Optional
 
 ACTIVE_SET_SIZE = 3
 REVIEWS_HORIZON = 3
@@ -51,7 +52,7 @@ class ProfessorCharles(AbstractAcquisitionProfessor):
         return self._current_card
 
 
-    def update_card(self):
+    def _update_card(self):
         if len(self._active_card_set) > 0:
             scores = [card['charles_score'] for card in self._active_card_set]
             do_widen = all([score >= WIDENING_THRESHOLD for score in scores])
@@ -75,18 +76,48 @@ class ProfessorCharles(AbstractAcquisitionProfessor):
             self._current_card = None
 
 
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
+
         result = 1 if answer == RIGHT_ANSWER_STR else 0
 
         if self._current_card is not None:
             self._current_card['charles_reviews'].append(result)
             self._current_card['charles_score'] = sum(self._current_card['charles_reviews'][:-REVIEWS_HORIZON]) #/ min(len(self._current_card['charles_reviews']), REVIEWS_HORIZON)
 
-        self.update_card()
+        self._update_card()
 
 
-    def update_card_list(self, card_list):
-        self._full_card_set = {card for card in card_list if not card["hidden"]}
+    def update_card_list(
+            self,
+            card_list: list,
+            review_hidden_cards: bool = False
+        ):
+        self._full_card_set = {card for card in card_list if ((not card["hidden"]) or review_hidden_cards)}
 
         # Init cards
         for card in self._full_card_set:
@@ -97,4 +128,4 @@ class ProfessorCharles(AbstractAcquisitionProfessor):
         self._active_card_set = set(random.sample(self._full_card_set,
                                                   k=min(len(self._full_card_set), ACTIVE_SET_SIZE)))
 
-        self.update_card()
+        self._update_card()

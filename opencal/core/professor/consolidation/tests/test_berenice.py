@@ -745,7 +745,7 @@ def test_estimate_card_difficulty():
 ###############################################################################
 
 def test_empty_card_list():
-    """Test `professor.current_card` and `professor.switch_grade()`.
+    """Test `professor.current_card` and `professor._switch_grade_loop()`.
 
     Check that `professor.current_card` returns `None` on empty card lists.
     """
@@ -753,7 +753,7 @@ def test_empty_card_list():
     assert prof.current_card == None
 
 def test_one_card_skip():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer="skip")` removes the card from the stack ;
@@ -772,7 +772,7 @@ def test_one_card_skip():
     assert current_card == None
 
 def test_one_card_right():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer=RIGHT_ANSWER_STR)` remove the card from the
@@ -795,7 +795,7 @@ def test_one_card_right():
     assert current_card == None
 
 def test_one_card_wrong():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer="wrong")` remove the card from the
@@ -818,7 +818,7 @@ def test_one_card_wrong():
     assert current_card == None
 
 def test_right_wrong_and_hide_reply():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer=RIGHT_ANSWER_STR, hide=True)` remove
@@ -856,7 +856,7 @@ def test_right_wrong_and_hide_reply():
     assert current_card == None
 
 def test_hide_cards():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card_reply(answer="skip", hide=True)` remove
@@ -888,7 +888,7 @@ def test_hide_cards():
     assert current_card == None
 
 def test_one_hidden_card():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor` exclude hidden cards ;
@@ -899,7 +899,7 @@ def test_one_hidden_card():
     assert prof.current_card == None
 
 def test_three_cards_two_hidden():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor` exclude hidden cards ;
@@ -922,7 +922,7 @@ def test_three_cards_two_hidden():
 
 
 def test_max_cards_per_grade():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card` returns the expected cards ;
@@ -977,7 +977,7 @@ def test_max_cards_per_grade():
 
 
 def test_init_right_answer_current_grade():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - right answers made today in a previous training session are counted in `self.num_right_answer_current_grade` (i.e. when the opencal executable has been called several time the same day) ;
@@ -1042,10 +1042,10 @@ def test_init_right_answer_current_grade():
 
 
 def test_switch_grade_min2():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
-    - `professor.switch_grade` switch from level -2 to level 1 and from level GRADE_CARD_NEVER_REVIEWED to level 1 ;
+    - `professor._switch_grade_loop` switch from level -2 to level 1 and from level GRADE_CARD_NEVER_REVIEWED to level 1 ;
     """
     card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
     card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)
@@ -1101,10 +1101,10 @@ def test_switch_grade_min2():
 
 
 def test_switch_grade_min1():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
-    - `professor.switch_grade` switch from level -2 to level 1 and from level -1 to level 1 ;
+    - `professor._switch_grade_loop` switch from level -2 to level 1 and from level -1 to level 1 ;
     """
     card_level_min2_age8 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_1)
     card_level_min2_age3 = copy.deepcopy(CARD_WRONG_REVIEW_YESTERDAY_3)
@@ -1168,7 +1168,7 @@ def test_switch_grade_min1():
 
 
 def test_several_cards():
-    """Test `professor.current_card`, `professor.switch_grade()` and `professor.current_card_reply()`.
+    """Test `professor.current_card`, `professor._switch_grade_loop()` and `professor.current_card_reply()`.
 
     Check that:
     - `professor.current_card` returns the expected cards ;

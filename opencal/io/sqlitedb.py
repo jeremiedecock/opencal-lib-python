@@ -379,12 +379,12 @@ def create_acquisition_review_table(opencal_db_path: os.PathLike) -> None:
     print(f"Creating table {ACQUISITION_REVIEW_TABLE_NAME}...")
 
     sql_query_str = f"""CREATE TABLE {ACQUISITION_REVIEW_TABLE_NAME} (
-        id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-        card_id              INTEGER NOT NULL,
-        review_datetime      TEXT DEFAULT CURRENT_TIMESTAMP,
-        review_duration_ms   INTEGER,
-        is_right_answer      INTEGER NOT NULL,
-        FOREIGN KEY(card_id) REFERENCES {CARD_TABLE_NAME}(id)
+        id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+        card_id                 INTEGER NOT NULL,
+        review_datetime         TEXT DEFAULT CURRENT_TIMESTAMP,
+        user_response_time_ms   INTEGER,
+        is_right_answer         INTEGER NOT NULL,
+        FOREIGN KEY(card_id)    REFERENCES {CARD_TABLE_NAME}(id)
     )"""
 
     cur.execute(sql_query_str)

@@ -8,6 +8,7 @@ import math
 
 from opencal.core.professor.consolidation.professor import AbstractConsolidationProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
+from typing import Optional
 
 GRADE_CARD_NEVER_REVIEWED = -1
 GRADE_CARD_WRONG_YESTERDAY = -2
@@ -52,7 +53,33 @@ class ProfessorAlice(AbstractConsolidationProfessor):
     def current_card(self):
         return self._card_list[0] if len(self._card_list) > 0 else None
 
-    def current_card_reply(self, answer, hide=False, duration=None, confidence=None):
+    def current_card_reply(
+            self,
+            answer: str,
+            hide: bool = False,
+            user_response_time_ms: Optional[int] = None,
+            confidence: Optional[float] = None
+        ) -> None:
+        """
+        Handle the reply to the current card.
+
+        Parameters
+        ----------
+        answer : str
+            The answer provided by the user.
+        hide : bool, optional
+            Whether to hide the card after the reply (default is False).
+        user_response_time_ms : Optional[int], optional
+            The time taken by the user to respond, in milliseconds (default is None).
+        confidence : Optional[float], optional
+            The confidence level of the user's answer (default is None).
+
+        Returns
+        -------
+        None
+            This function does not return any value.
+        """
+
         if len(self._card_list) > 0:
             card = self._card_list.pop(0)
 

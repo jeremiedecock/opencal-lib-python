@@ -30,6 +30,7 @@ version = "3.6.0"
 opencal-backup = "opencal.io.sqlitedb:backup_db"
 opencal-dump = "opencal.io.sqlitedb:dump_db"
 opencal-restore = "opencal.io.sqlitedb:restore_db"
+opencal-xml-to-sqlite = "opencal.io.sqlitedb:xml_to_sqlite"
 
 # See https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
 [tool.setuptools]

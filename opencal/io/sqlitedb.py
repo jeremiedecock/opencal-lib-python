@@ -3,6 +3,7 @@
 
 import datetime
 import opencal
+import opencal.io.pkb
 import os
 import sqlite3
 from typing import Any, Dict, List, Optional
@@ -562,6 +563,39 @@ def restore_db(
 
     print(f"Database restored at {opencal_db_path} from the {dump_file_path} dump file")
 
+
+def xml_to_sqlite(
+        xml_file_path: Optional[os.PathLike] = None,
+        sqlite_file_path: Optional[os.PathLike] = None
+    ) -> None:
+
+    if xml_file_path is None:
+        xml_file_path = opencal.cfg["opencal"]["pkb_path"]
+    if sqlite_file_path is None:
+        sqlite_file_path = opencal.cfg['opencal']['db_path']
+
+    xml_file_path = opencal.path.expand_path(xml_file_path)
+    sqlite_file_path = opencal.path.expand_path(sqlite_file_path)
+
+    # Load the XML database ###################################################
+
+    print("Loading XML PKB file", xml_file_path)
+    card_list = opencal.io.pkb.load_pkb(xml_file_path)
+
+    # Drop and recreate the SQLite database ###################################
+
+    # Drop all tables except the acquisition review table (which does not exist in the XML database)
+    create_config_table(sqlite_file_path)
+    create_card_table(sqlite_file_path)
+    create_consolidation_review_table(sqlite_file_path)
+
+    # Save the database to SQLite #############################################
+
+    print("Saving to SQLite database", sqlite_file_path)
+    save_pkb(
+        card_list=card_list,
+        opencal_db_path=sqlite_file_path
+    )
 
 # DEBUG #######################################################################
 

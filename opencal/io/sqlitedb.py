@@ -560,7 +560,7 @@ def restore_db(
 
     con.close()
 
-    print("Database restored from", dump_file_path)
+    print(f"Database restored at {opencal_db_path} from the {dump_file_path} dump file")
 
 
 # DEBUG #######################################################################

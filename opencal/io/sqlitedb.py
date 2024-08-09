@@ -4,6 +4,7 @@
 import datetime
 import opencal
 import opencal.io.pkb
+from opencal.review import ConsolidationReview
 import os
 import sqlite3
 from typing import Any, Dict, List, Optional
@@ -28,7 +29,7 @@ def save_pkb(
         opencal_db_path: os.PathLike
     ) -> None:
     """
-    Save the personal knowledge base (PKB) to an SQLite database.
+    Save the provided list of cards to an SQLite database.
 
     This function takes a list of cards and saves them to the specified
     SQLite database. Each card contains information such as creation
@@ -214,12 +215,12 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
 
         review_date = datetime.datetime.strptime(review_date_str, PY_DATE_FORMAT) #.date()
 
-        review_dict = {
-            "rdate": review_date,
-            "result": "good" if is_right_answer else "bad"
-        }
+        consolidation_review = ConsolidationReview(
+            review_datetime=review_date,
+            is_right_answer=is_right_answer
+        )
 
-        cards_dict[card_id]["reviews"].append(review_dict)
+        cards_dict[card_id]["reviews"].append(consolidation_review)
 
     con.close()
 

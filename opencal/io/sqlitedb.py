@@ -4,6 +4,7 @@
 import datetime
 import opencal
 import opencal.io.pkb
+from opencal.card import Card
 from opencal.review import ConsolidationReview
 import os
 import sqlite3
@@ -139,13 +140,12 @@ def save_pkb(
 
 # LOAD PKB ####################################################################
 
-def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
+def load_pkb(opencal_db_path: os.PathLike) -> List[Card]:
     """
     Load the personal knowledge base (PKB) from an SQLite database.
 
     This function reads the PKB from the specified SQLite database and parses
-    it into a list of cards. Each card is represented as a dictionary with
-    keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    it into a list of cards.
 
     Note that this function is a temporary workaround until the database is fully integrated to the core of OpenCal.
 
@@ -156,9 +156,8 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
 
     Returns
     -------
-    List[Dict[str, Any]]
-        A list of dictionaries where each dictionary represents a card with
-        keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    List[Card]
+        A list of cards.
     """
 
     # opencal_db_path = opencal.path.expand_path(opencal.cfg['opencal']['db_path'])    # TODO: remove this line to the caller
@@ -173,7 +172,7 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
 
     # LOAD CARDS ######################
 
-    cards_dict: Dict[int, Dict[str, Any]] = {}   # A dictionary containing all the cards
+    cards_dict: Dict[int, Card] = {}   # A dictionary containing all the cards
 
     sql_query_str = f"SELECT id, creation_datetime, is_hidden, question, answer, tags FROM {CARD_TABLE_NAME} ORDER BY id"
 
@@ -196,14 +195,13 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
         if tags_list == [""]:
             tags_list = []
 
-        cards_dict[card_id] = {
-            "cdate": card_creation_date,
-            "hidden": bool(is_hidden),
-            "question": question,
-            "answer": answer,
-            "reviews": [],        # List of dictionaries (each dictionary object is a *consolidation review* for this card)
-            "tags": tags_list
-        }
+        cards_dict[card_id] = Card(
+            creation_datetime=card_creation_date,
+            question=question,
+            answer=answer,
+            is_hidden=bool(is_hidden),
+            tags=tags_list
+        )
 
     # LOAD REVIEWS ####################
 
@@ -228,8 +226,8 @@ def load_pkb(opencal_db_path: os.PathLike) -> List[Dict[str, Any]]:
     cards_list = [card for _, card in sorted(cards_dict.items())]
 
     # Sort reviews for each card by date
-    for card_dict in cards_list:
-        card_dict["reviews"] = sorted(card_dict["reviews"], key=lambda review_dict: review_dict["rdate"])
+    for card in cards_list:
+        card.consolidation_reviews = sorted(card.consolidation_reviews, key=lambda consolidation_review: consolidation_review.review_datetime)
 
     return cards_list
 

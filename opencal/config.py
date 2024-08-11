@@ -3,6 +3,7 @@ import yaml
 import random
 import string
 #from dataclasses import dataclass
+from typing import Tuple, Dict, Any
 
 import opencal.path
 
@@ -103,7 +104,7 @@ opencal_ui:
 #     reverse_level_0: bool
 #     default_html_base_path: str
 
-def get_config(config_path: str = None) -> (dict, str):
+def get_config(config_path: str = None) -> Tuple[Dict[Any, Any], str]:
     """
     Get the configuration dictionary and the path to the configuration file.
 

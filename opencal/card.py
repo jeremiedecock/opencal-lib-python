@@ -50,7 +50,11 @@ class Card:
         if consolidation_reviews is None:
             self.consolidation_reviews: List[ConsolidationReview] = []
         else:
-            self.consolidation_reviews: List[ConsolidationReview] = tags
+            self.consolidation_reviews: List[ConsolidationReview] = consolidation_reviews
+
+        self.grade: Union[float, int] = None       # TODO?
+        self.priority: Union[float, int] = None    # TODO?
+        self.difficulty: Union[float, int] = None  # TODO?
 
 
     def __getitem__(self, key: str) -> Optional[Union[str, datetime, bool, List[str]]]:
@@ -89,6 +93,12 @@ class Card:
             return self.tags
         elif key == "reviews":
             return self.consolidation_reviews
+        elif key == "grade":
+            return self.grade
+        elif key == "priority":
+            return self.priority
+        elif key == "difficulty":
+            return self.difficulty
         else:
             raise KeyError(f"Key {key} not found in Card attributes")
 
@@ -152,6 +162,18 @@ class Card:
             if not isinstance(value, list):
                 raise TypeError(f"Expected list, got {type(value)}")
             self.consolidation_reviews = value
+        elif key == "grade":
+            if not isinstance(value, (float, int)):
+                raise TypeError(f"Expected float or int, got {type(value)}")
+            self.grade = value
+        elif key == "priority":
+            if not isinstance(value, (float, int)):
+                raise TypeError(f"Expected float or int, got {type(value)}")
+            self.priority = value
+        elif key == "difficulty":
+            if not isinstance(value, (float, int)):
+                raise TypeError(f"Expected float or int, got {type(value)}")
+            self.difficulty = value
         else:
             raise KeyError(f"Key {key} not found in Card attributes")
 

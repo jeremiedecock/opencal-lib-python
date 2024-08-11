@@ -1,5 +1,7 @@
 import datetime
 import opencal
+from opencal.card import Card
+from opencal.review import ConsolidationReview
 import os
 from typing import Any, Dict, List, Optional
 import warnings
@@ -24,7 +26,7 @@ class XmlPkbError(Exception):
 # SAVE PKB ####################################################################
 
 def save_pkb(
-        card_list: List[Dict[str, Any]],
+        card_list: List[Card],
         pkb_path: str
     ) -> None:
     """
@@ -36,9 +38,8 @@ def save_pkb(
 
     Parameters
     ----------
-    card_list : List[Dict[str, Any]]
-        A list of dictionaries where each dictionary represents a card with
-        keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    card_list : List[Card]
+        A list of cards.
     pkb_path : str
         The file path where the PKB should be saved. This path can include
         user home directory shortcuts (e.g., "~/...") and relative paths.
@@ -54,8 +55,8 @@ def save_pkb(
         fd.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
         fd.write('<pkb>\n')
         for card in card_list:
-            cdate_str = card['cdate'].strftime(PY_DATE_FORMAT)
-            hidden_str = 'true' if card['hidden'] else 'false'
+            cdate_str = card.creation_datetime.strftime(PY_DATE_FORMAT)
+            hidden_str = 'true' if card.is_hidden else 'false'
 
             fd.write(f'<card cdate="{cdate_str}" hidden="{hidden_str}">\n')
 
@@ -66,20 +67,27 @@ def save_pkb(
             # - https://en.wikipedia.org/wiki/CDATA#Issues_with_encoding
             # - https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
 
-            question_str = card['question'].replace("]]>", "]]]]><![CDATA[>")
+            question_str = card.question.replace("]]>", "]]]]><![CDATA[>")
             fd.write(f'<question><![CDATA[{question_str}]]></question>\n')
-            if card['answer'] == '':
+            if card.answer == '':
                 fd.write('<answer/>\n')
             else:
-                answer_str = card['answer'].replace("]]>", "]]]]><![CDATA[>")
+                answer_str = card.answer.replace("]]>", "]]]]><![CDATA[>")
                 fd.write(f'<answer><![CDATA[{answer_str}]]></answer>\n')
 
-            for tag in card['tags']:
+            for tag in card.tags:
                 fd.write(f'<tag>{tag}</tag>\n')
             
-            for review in card['reviews']:
-                rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
-                fd.write(f'<review rdate="{rdate_str}" result="{review["result"]}"/>\n')
+            for review in card.consolidation_reviews:
+                if isinstance(review, ConsolidationReview):
+                    rdate_str = review.review_datetime.strftime(PY_DATE_FORMAT)
+                    result_str = "good" if review.is_right_answer else "bad"
+                    fd.write(f'<review rdate="{rdate_str}" result="{result_str}"/>\n')
+                elif isinstance(review, dict): # TODO: Temporary workaround for backward compatibility
+                    rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
+                    fd.write(f'<review rdate="{rdate_str}" result="{review["result"]}"/>\n')
+                else:
+                    raise ValueError(f"Unexpected review type: {type(review)}")
 
             fd.write('</card>\n')
         fd.write('</pkb>\n')
@@ -87,13 +95,12 @@ def save_pkb(
 
 # LOAD PKB ####################################################################
 
-def load_pkb(pkb_path: str) -> List[Dict[str, Any]]:
+def load_pkb(pkb_path: str) -> List[Card]:
     """
     Load the personal knowledge base (PKB) from an XML file.
 
     This function reads the PKB from the specified XML file path and parses
-    it into a list of cards. Each card is represented as a dictionary with
-    keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    it into a list of cards.
 
     Parameters
     ----------
@@ -103,9 +110,8 @@ def load_pkb(pkb_path: str) -> List[Dict[str, Any]]:
 
     Returns
     -------
-    List[Dict[str, Any]]
-        A list of dictionaries where each dictionary represents a card with
-        keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    List[Card]
+        A list of cards.
     """
 
     pkb_path = opencal.path.expand_path(pkb_path)
@@ -143,27 +149,25 @@ class PKBHandler(ContentHandler, ErrorHandler):
         -------
         None
         """
-        self._card_list: List[Dict[str, Any]] = []
+        self._card_list: List[Card] = []
 
-        self._current_card: Optional[Dict[str, Any]] = None
+        self._current_card: Optional[Card] = None
         self._current_question: Optional[str] = None
         self._current_answer: Optional[str] = None
-        self._current_review: Optional[Dict[str, Any]] = None
+        self._current_review: Optional[ConsolidationReview] = None
         self._current_tag: Optional[str] = None
 
     @property
-    def card_list(self) -> List[Dict[str, Any]]:
+    def card_list(self) -> List[Card]:
         """
         Get the list of cards.
 
         This property returns the list of cards parsed from the XML file.
-        Each card is represented as a dictionary with keys such as 'cdate',
-        'hidden', 'question', 'answer', 'tags', and 'reviews'.
 
         Returns
         -------
-        List[Dict[str, Any]]
-            A list of dictionaries where each dictionary represents a card.
+        List[Card]
+            A list of cards.
         """
         return self._card_list
 
@@ -227,15 +231,30 @@ class PKBHandler(ContentHandler, ErrorHandler):
             self._current_answer = ""
         elif name == "review":
             assert self._current_review is None and self._current_card is not None
-            self._current_review = {}
+
+            review_date = None
+            is_right_answer = None
 
             for key, value in list(attr.items()):
                 if key == "rdate":
-                    self._current_review[key] = datetime.datetime.strptime(value, PY_DATE_FORMAT) #.date()
+                    review_date = datetime.datetime.strptime(value, PY_DATE_FORMAT) #.date()
                 elif key == "result":
-                    self._current_review[key] = value
+                    if value == 'good':
+                        is_right_answer = True
+                    elif value == 'bad':
+                        is_right_answer = False
+                    else:
+                        raise ValueError(f'Unknown result value "{value}"')
                 else:
-                    raise ValueError(key)
+                    raise ValueError(f"Unknown XML attribute {key}")
+
+            if (review_date is not None) and (is_right_answer is not None):
+                self._current_review =  ConsolidationReview(
+                    review_datetime=review_date,
+                    is_right_answer=is_right_answer
+                )
+            else:
+                raise ValueError('"rdate" and "result" must be defined')
         elif name == "tag":
             assert self._current_tag is None and self._current_card is not None
             self._current_tag = ""
@@ -265,25 +284,34 @@ class PKBHandler(ContentHandler, ErrorHandler):
         if name == "card":
             assert self._current_card is not None
 
+            current_card = Card(
+                creation_datetime=self._current_card["cdate"],
+                question=self._current_card["question"],
+                answer=self._current_card["answer"],
+                is_hidden=self._current_card["hidden"],
+                tags=self._current_card["tags"],
+                consolidation_reviews=self._current_card["reviews"]
+            )
+
             # Sort reviews ("in-place")
-            self._current_card["reviews"].sort(key=lambda x: x["rdate"])
+            current_card.consolidation_reviews.sort(key=lambda review: review.review_datetime)
 
             # TODO: IS THE FOLLOWING CODE REALLY USEFUL???
             # Add the "timedelta" and "last_validated_timedelta" attributes to each "review"
-            if ("reviews" in self._current_card) and len(self._current_card["reviews"]) > 0:
-                self._current_card["reviews"][0]["timedelta"] = TIME_DELTA_OF_FIRST_REVIEWS
-                self._current_card["reviews"][0]["last_validated_timedelta"] = INIT_VALIDATED_TIME_DELTA
+            if len(current_card.consolidation_reviews) > 0:
+                current_card.consolidation_reviews[0].timedelta = TIME_DELTA_OF_FIRST_REVIEWS
+                current_card.consolidation_reviews[0].last_validated_timedelta = INIT_VALIDATED_TIME_DELTA
 
-                for i in range(1, len(self._current_card["reviews"])):
-                    previous_timedelta = self._current_card["reviews"][i-1]["timedelta"]
-                    previous_result = self._current_card["reviews"][i-1]["result"]
-                    self._current_card["reviews"][i]["last_validated_timedelta"] = previous_timedelta if previous_result == RIGHT_ANSWER_STR else INIT_VALIDATED_TIME_DELTA
+                for i in range(1, len(current_card.consolidation_reviews)):
+                    previous_timedelta = current_card.consolidation_reviews[i-1].timedelta
+                    is_right_previous_answer = current_card.consolidation_reviews[i-1].is_right_answer
+                    current_card.consolidation_reviews[i].last_validated_timedelta = previous_timedelta if is_right_previous_answer else INIT_VALIDATED_TIME_DELTA
 
-                    dt1 = self._current_card["reviews"][i-1]["rdate"]
-                    dt2 = self._current_card["reviews"][i]["rdate"]
-                    self._current_card["reviews"][i]["timedelta"] = dt2 - dt1
+                    dt1 = current_card.consolidation_reviews[i-1].review_datetime
+                    dt2 = current_card.consolidation_reviews[i].review_datetime
+                    current_card.consolidation_reviews[i].timedelta = dt2 - dt1
 
-            self._card_list.append(self._current_card)
+            self._card_list.append(current_card)
             self._current_card = None
         elif name == "question":
             assert self._current_question is not None and self._current_card is not None
@@ -302,17 +330,6 @@ class PKBHandler(ContentHandler, ErrorHandler):
             self._current_card["tags"].append(self._current_tag)
             self._current_tag = None
 
-
-    # def startElementNS(self, name, qname, attr):
-    #     """TODO: improve this"""
-    #     print("Start NS element:", name, qname, end=' ')
-    #     for key, value in list(attr.items()):
-    #         print("[", key, "=", value, "]", end=' ')
-    #     print()
-
-    # def endElementNS(self, name, qname):
-    #     """TODO: improve this"""
-    #     print("End NS element:", name, qname)
 
     def characters(
             self,

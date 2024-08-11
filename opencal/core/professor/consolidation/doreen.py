@@ -6,11 +6,12 @@ import datetime
 import math
 import warnings
 
-from typing import Optional, Union
+from typing import Any, Optional, Union, List, Dict
 
+from opencal.card import Card
 from opencal.core.professor.consolidation.professor import AbstractConsolidationProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
-from typing import Optional
+from opencal.review import ConsolidationReview
 
 GRADE_DONT_REVIEW_THIS_CARD_TODAY = -1
 GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER = -2
@@ -25,13 +26,15 @@ VERBOSE = True
 class ProfessorDoreen(AbstractConsolidationProfessor):
 
     def __init__(self,
-                 card_list: list,
-                 date_mock: Optional[datetime.date] = None,
+                 card_list: List[Card],
+                 date_mock: Optional[datetime.date] = None,               # TODO: replace this by a reference to the function used to get the current datetime
                  max_cards_per_grade: int = DEFAULT_MAX_CARDS_PER_GRADE,
-                 tag_priorities: Optional[dict] = None,                   # TODO: Python > 3.8: dict | None = None
-                 tag_difficulties: Optional[dict] = None,
-                 priorities_per_level: Optional[dict] = None):
+                 tag_priorities: Optional[Dict[str, float]] = None,                   # TODO: Python > 3.8: dict | None = None
+                 tag_difficulties: Optional[Dict[str, float]] = None,                 # TODO
+                 priorities_per_level: Optional[Dict[Union[int, str], List[Dict[str, Any]]]] = None):            # TODO
         super().__init__()
+
+        self.current_sub_list : Optional[List[Card]] = None
 
         self.max_cards_per_grade = max_cards_per_grade
         self.tag_priority_dict = tag_priorities if tag_priorities is not None else {}
@@ -55,8 +58,8 @@ class ProfessorDoreen(AbstractConsolidationProfessor):
             print("tag_priority_dict =", self.tag_priority_dict)
             print("tag_difficulty_dict =", self.tag_difficulty_dict)
 
-        self._card_list_dict = {}
-        self.num_right_answers_per_grade = {}
+        self._card_list_dict : Dict[int, List[Card]] = {}
+        self.num_right_answers_per_grade : Dict[int, int] = {}
         self.num_wrong_answers = 0             # TODO: BUG -> doesn't take into account wrong answers from previous executions...
 
         # Défini la date actuelle qui peut être soit la vraie date actuelle soit un mock
@@ -69,16 +72,16 @@ class ProfessorDoreen(AbstractConsolidationProfessor):
         # Initialize and update self.num_right_answers_per_grade
         # Initialize and update self._card_list_dict
         for card in card_list:
-            if not card["hidden"]:
+            if not card.is_hidden:
                 # Set card's grade
                 grade = assess(card, date_mock=date_mock)
-                card["grade"] = grade
+                card.grade = grade
 
                 # Estimate the priority of each card
-                card["priority"] = estimate_card_priority(card, self.tag_priority_dict)
+                card.priority = estimate_card_priority(card, self.tag_priority_dict)
 
                 # Set card's difficulty
-                card["difficulty"] = estimate_card_difficulty(card, self.tag_difficulty_dict)
+                card.difficulty = estimate_card_difficulty(card, self.tag_difficulty_dict)
 
                 # Initialize and update self.num_right_answers_per_grade
                 if grade == GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER:
@@ -87,7 +90,7 @@ class ProfessorDoreen(AbstractConsolidationProfessor):
 
                     if grade_without_today_answers not in self.num_right_answers_per_grade:
                         self.num_right_answers_per_grade[grade_without_today_answers] = 0
-                    self.num_right_answers_per_grade[grade_without_today_answers] += card["difficulty"]
+                    self.num_right_answers_per_grade[grade_without_today_answers] += card.difficulty
 
                 elif grade != GRADE_DONT_REVIEW_THIS_CARD_TODAY:
 
@@ -179,18 +182,12 @@ class ProfessorDoreen(AbstractConsolidationProfessor):
             card = self.current_sub_list.pop(0)
 
             if answer == RIGHT_ANSWER_STR:
-                review = {
-                    "rdate": self._date.today(),
-                    "result": RIGHT_ANSWER_STR
-                }
-                card["reviews"].append(review)
-                self.num_right_answers_per_grade[self.current_grade] += card["difficulty"]
+                review = ConsolidationReview(review_datetime=self._date.today(), is_right_answer=True)  # TODO: use datetime instead date
+                card.consolidation_reviews.append(review)
+                self.num_right_answers_per_grade[self.current_grade] += card.difficulty
             elif answer == WRONG_ANSWER_STR:
-                review = {
-                    "rdate": self._date.today(),
-                    "result": WRONG_ANSWER_STR
-                }
-                card["reviews"].append(review)
+                review = ConsolidationReview(review_datetime=self._date.today(), is_right_answer=False)  # TODO: use datetime instead date
+                card.consolidation_reviews.append(review)
                 self.num_wrong_answers += 1
             elif answer == "skip":
                 pass
@@ -200,10 +197,12 @@ class ProfessorDoreen(AbstractConsolidationProfessor):
                 raise ValueError(f"Unknown answer : {answer}")
 
             if hide:
-                card["hidden"] = True
+                card.is_hidden = True
 
 
-def datetime_to_date(d: Union[datetime.datetime, datetime.date]) -> datetime.date:
+def datetime_to_date(
+        d: Union[datetime.datetime, datetime.date]
+    ) -> datetime.date:
     '''If the object is an instance of datetime.datetime then convert it to a datetime.datetime.date object.
 
     If it's already a date object, do nothing.'''
@@ -214,44 +213,45 @@ def datetime_to_date(d: Union[datetime.datetime, datetime.date]) -> datetime.dat
     return d
 
 
-def assess(card, date_mock=None, ignore_today_answers=False):
+def assess(
+        card: Card,
+        date_mock: Optional[datetime.date] = None,
+        ignore_today_answers: bool = False
+    ):
     grade = 0
 
-    cdate = datetime_to_date(card["cdate"])
+    cdate = datetime_to_date(card.creation_datetime)
 
     if date_mock is None:
         today = datetime.date.today()
     else:
         today = date_mock.today()
 
-    if "reviews" in card.keys():
-        if ignore_today_answers:
-            review_list = [review for review in card["reviews"] if datetime_to_date(review["rdate"]) < today]
-        else:
-            review_list = card["reviews"]
+    if ignore_today_answers:
+        review_list = [review for review in card.consolidation_reviews if datetime_to_date(review.review_datetime) < today]
     else:
-        review_list = []
+        review_list = card.consolidation_reviews
 
     if len(review_list) > 0:
         # Reviews are supposed to be sorted!
-        assert all(review_list[i]["rdate"] <= review_list[i+1]["rdate"] for i in range(len(review_list)-1))
-        #review_list.sort(key=lambda x: x["rdate"])
+        assert all(review_list[i].review_datetime <= review_list[i+1].review_datetime for i in range(len(review_list)-1))
+        #review_list.sort(key=lambda x: x.review_datetime)
 
         yesterday = today - datetime.timedelta(days=1)
-        last_review_result = review_list[-1]["result"]
-        last_review_rdate = datetime_to_date(review_list[-1]["rdate"])
+        last_review_is_right_answer = review_list[-1].is_right_answer
+        last_review_rdate = datetime_to_date(review_list[-1].review_datetime)
 
-        if last_review_rdate == today and last_review_result == RIGHT_ANSWER_STR:
+        if last_review_rdate == today and last_review_is_right_answer:
             grade = GRADE_REVIEWED_TODAY_WITH_RIGHT_ANSWER
         else:
             expected_revision_date = get_expected_revision_date(cdate, grade)
 
             for review in review_list:
-                rdate = datetime_to_date(review["rdate"])
-                result = review["result"]
+                rdate = datetime_to_date(review.review_datetime)
+                is_right_answer = review.is_right_answer
 
                 if rdate <= today:                            # Ignore future reviews
-                    if result == RIGHT_ANSWER_STR:
+                    if is_right_answer:
                         if rdate >= expected_revision_date:   # "rdate before expected_revision_date"
                             grade += 1
                             expected_revision_date = get_expected_revision_date(rdate, grade)
@@ -286,13 +286,16 @@ def delta_days(grade):
     return int(math.pow(2, grade))
 
 
-def estimate_card_priority(card, tag_priority_dict):
+def estimate_card_priority(
+        card: Card,
+        tag_priority_dict: Dict[str, float]
+    ):
     # TODO: estimate the priority of each card... -> utilise deux liste de liste tags definie dans le fichier de config .yaml :$
     # prof_doreen = [['maths', 'algebre', ...], ['accenta'], ['important', 'high priority', ...], ...] ;
     # prof_berebice_low_priority_tags = [[...], ...] -> chaque sous liste est un ensemble de tags équivalant ;
     # chaque tag ds high priority => card priority += 1 ; chaque tag dans low_prio_list => card priority -= 1
 
-    tag_priority_list = [tag_priority_dict.get(tag, DEFAULT_PRIORITY) for tag in card["tags"]]
+    tag_priority_list = [tag_priority_dict.get(tag, DEFAULT_PRIORITY) for tag in card.tags]
 
     if len(tag_priority_list) == 0:
         card_priority = DEFAULT_PRIORITY
@@ -305,12 +308,15 @@ def estimate_card_priority(card, tag_priority_dict):
     return card_priority
 
 
-def estimate_card_difficulty(card, tag_difficulty_dict):
+def estimate_card_difficulty(
+        card: Card,
+        tag_difficulty_dict: Dict[str, float]
+    ):
     # TODO: tags (+ maybe rate of right answer and avg response time)
 
     tag_difficulty_list = []
 
-    for tag in card["tags"]:
+    for tag in card.tags:
         if tag in tag_difficulty_dict:
             tag_difficulty_list.append(tag_difficulty_dict[tag])
 
@@ -322,7 +328,12 @@ def estimate_card_difficulty(card, tag_difficulty_dict):
     return card_difficulty
 
 
-def sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_level):
+def sort_sub_list(
+        sub_list: List[Card],
+        sub_list_grade: int,
+        tag_priority_dict,
+        priorities_per_level: Dict[Union[int, str], List[Dict[str, Any]]]
+    ):
     """Une "sub_list" est un liste de cartes où toutes les cartes ont le même "grade"
 
     mis dans une fonction à part pour pouvoir être testé plus facilement dans des tests unitaires
@@ -334,9 +345,9 @@ def sort_sub_list(sub_list, sub_list_grade, tag_priority_dict, priorities_per_le
 
     for priority_dict in priority_list:
         if priority_dict["sort_fn"] == "tag":
-            sort_fn = lambda _card : _card["priority"]
+            sort_fn = lambda _card : _card.priority
         elif priority_dict["sort_fn"] == "date":
-            sort_fn = lambda _card : max([_card["cdate"]] + [review["rdate"] for review in _card["reviews"]])
+            sort_fn = lambda _card : max([_card.creation_datetime] + [review.review_datetime for review in _card.consolidation_reviews])
         else:
             raise Exception(f'Unknown sort function {priority_dict["sort_fn"]}; available functions are: "tag" or "date"')
         

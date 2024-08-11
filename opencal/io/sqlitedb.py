@@ -26,7 +26,7 @@ CONSOLIDATION_REVIEW_TABLE_NAME = "t_consolidation_review"
 # SAVE PKB ####################################################################
 
 def save_pkb(
-        card_list: List[Dict[str, Any]],
+        card_list: List[Card],
         opencal_db_path: os.PathLike
     ) -> None:
     """
@@ -40,9 +40,8 @@ def save_pkb(
 
     Parameters
     ----------
-    card_list : List[Dict[str, Any]]
-        A list of dictionaries where each dictionary represents a card with
-        keys such as 'cdate', 'hidden', 'question', 'answer', 'tags', and 'reviews'.
+    card_list : List[Card]
+        A list of cards.
     opencal_db_path : os.PathLike
         The SQLite database where the PKB should be saved.
 
@@ -64,53 +63,31 @@ def save_pkb(
 
     last_review_id = 0
 
-    for card_id, card_dict in enumerate(card_list):
+    for card_id, card in enumerate(card_list):
 
         # Card ########################
 
-        cdate = card_dict["cdate"]
-        is_hidden = card_dict["hidden"]
-        question = card_dict["question"]      #.strip() # remove strip() because it generates fake differences with the original XML file
-        answer = card_dict.get("answer", "")  #.strip()
-        tag_list = card_dict["tags"]
-        review_list = card_dict["reviews"]
-
-        assert is_hidden in (True, False)
-        is_hidden = int(is_hidden)
-
-        tags_str = "\n".join(tag_list)
-
         sql_card_table_insert_params.append({
             "id": int(card_id),
-            "creation_datetime": cdate.strftime(PY_DATE_FORMAT),
-            "is_hidden": is_hidden,
-            "question": question,
-            "answer": answer,
-            "tags": tags_str
+            "creation_datetime": card.creation_datetime.strftime(PY_DATE_FORMAT),
+            "is_hidden": int(card.is_hidden),
+            "question": card.question,        #.strip() # remove strip() because it generates fake differences with the original XML file
+            "answer": card.answer,            #.strip() # remove strip() because it generates fake differences with the original XML file
+            "tags": "\n".join(card.tags)
         })
 
         # Reviews #####################
 
-        for review in review_list:
+        for review in card.consolidation_reviews:
 
             review_id = last_review_id
             last_review_id += 1
 
-            review_date = review["rdate"]
-            result = review["result"]
-
-            if result == 'good':
-                is_right_answer = True
-            elif result == 'bad':
-                is_right_answer = False
-            else:
-                raise ValueError(f'Unknown result value "{result}" for consolidation review {review_id}')
-
             sql_review_table_insert_params.append({
                 "id": int(review_id),
                 "card_id": card_id,
-                "review_datetime": review_date.strftime(PY_DATE_FORMAT),
-                "is_right_answer": is_right_answer
+                "review_datetime": review.review_datetime.strftime(PY_DATE_FORMAT),
+                "is_right_answer": review.is_right_answer
             })
 
     # INSERT SQL DATA INTO THE CARD TABLE #####################################

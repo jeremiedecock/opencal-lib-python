@@ -5,6 +5,7 @@
 This module contains unit tests for the "opencal.core.professor.acquisition.randy" module.
 """
 
+from opencal.card import Card
 from opencal.core.professor.acquisition import randy
 
 import datetime
@@ -12,32 +13,32 @@ import random
 
 # CARDS ###################################################
 
-CARD_1 = {
-            'reviews': [],
-            'tags': ['baz'],
-            'cdate': datetime.datetime(2018, 1, 1, 0, 0),
-            'hidden': False,
-            'question': 'foo',
-            'answer': 'bar'
-        }
+CARD_1 = Card(
+        creation_datetime=datetime.datetime(2018, 1, 1, 0, 0),
+        question='foo',
+        answer='bar',
+        is_hidden=False,
+        tags=['baz'],
+        consolidation_reviews=None
+    )
 
-CARD_2 = {
-            'reviews': [],
-            'tags': ['baz'],
-            'cdate': datetime.datetime(2018, 1, 2, 0, 0),
-            'hidden': False,
-            'question': 'foo',
-            'answer': 'bar'
-        }
+CARD_2 = Card(
+        creation_datetime=datetime.datetime(2018, 1, 2, 0, 0),
+        question='foo',
+        answer='bar',
+        is_hidden=False,
+        tags=['baz'],
+        consolidation_reviews=None
+    )
 
-HIDDEN_CARD_1 = {
-            'reviews': [],
-            'tags': ['baz'],
-            'cdate': datetime.datetime(2018, 1, 1, 0, 0),
-            'hidden': True,
-            'question': 'foo',
-            'answer': 'bar'
-        }
+HIDDEN_CARD_1 = Card(
+        creation_datetime=datetime.datetime(2018, 1, 1, 0, 0),
+        question='foo',
+        answer='bar',
+        is_hidden=True,
+        tags=['baz'],
+        consolidation_reviews=None
+    )
 
 # CARD LISTS ##############################################
 

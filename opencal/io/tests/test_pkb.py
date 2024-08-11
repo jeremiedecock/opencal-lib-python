@@ -5,6 +5,7 @@
 This module contains unit tests for the "opencal.io.pkb" module.
 """
 
+from opencal.card import Card
 import opencal.io.pkb
 
 import datetime
@@ -269,12 +270,16 @@ def test_load_pkb_err_empty_cdate():
 
 
 def test_save_pkb_cdata_nesting():
-    card_list = [{'reviews': [],
-                  'tags': ['tag 1'],
-                  'cdate': datetime.datetime(2018, 1, 1, 0, 0),
-                  'hidden': False,
-                  'question': 'This is ]]></question><answer/><tag>Hack</tag></card><card cdate="2018-01-02" hidden="false"><question><![CDATA[an XML code injection example',
-                  'answer': ''}]
+    card = Card(
+        creation_datetime=datetime.datetime(2018, 1, 1, 0, 0),
+        question='This is ]]></question><answer/><tag>Hack</tag></card><card cdate="2018-01-02" hidden="false"><question><![CDATA[an XML code injection example',
+        answer='',
+        is_hidden=False,
+        tags=['tag 1'],
+        consolidation_reviews=None
+    )
+
+    card_list = [card]
 
     with tempfile.NamedTemporaryFile(mode='w') as tf:
         pkb_path = tf.name
@@ -294,16 +299,20 @@ def test_save_pkb_cdata_nesting():
     # Test ######################################
 
     assert len(card_list) == len(saved_card_list)     # If the XML code injection succedded then we have two cards instead of one
-    assert card_list[0]['question'] == saved_card_list[0]['question']  # Question is modified if the XML code injection succedded
+    assert card_list[0].question == saved_card_list[0].question  # Question is modified if the XML code injection succedded
 
 
 def test_save_pkb_cdata_nesting_2():
-    card_list = [{'reviews': [],
-                  'tags': ['tag 1'],
-                  'cdate': datetime.datetime(2018, 1, 1, 0, 0),
-                  'hidden': False,
-                  'question': 'foo]]>bar]]>baz',
-                  'answer': ''}]
+    card = Card(
+        creation_datetime=datetime.datetime(2018, 1, 1, 0, 0),
+        question='foo]]>bar]]>baz',
+        answer='',
+        is_hidden=False,
+        tags=['tag 1'],
+        consolidation_reviews=None
+    )
+
+    card_list = [card]
 
     with tempfile.NamedTemporaryFile(mode='w') as tf:
         pkb_path = tf.name
@@ -323,7 +332,7 @@ def test_save_pkb_cdata_nesting_2():
     # Test ######################################
 
     assert len(card_list) == len(saved_card_list)     # If the XML code injection succedded then we have two cards instead of one
-    assert card_list[0]['question'] == saved_card_list[0]['question']  # Question is modified if the XML code injection succedded
+    assert card_list[0].question == saved_card_list[0].question  # Question is modified if the XML code injection succedded
 
 
 def test_load_pkb_review_timedelta():
@@ -360,10 +369,10 @@ def test_load_pkb_review_timedelta():
 
     # Test ######################################
 
-    review_list = card_list[0]["reviews"]
+    review_list = card_list[0].consolidation_reviews
 
     for review, expected_timedelta in zip(review_list, expected_timedelta_list):
-        assert review['timedelta'] == expected_timedelta
+        assert review.timedelta == expected_timedelta
 
 
 def test_load_pkb_review_last_validated_timedelta():
@@ -419,10 +428,10 @@ def test_load_pkb_review_last_validated_timedelta():
 
     # Test ######################################
 
-    review_list = card_list[0]["reviews"]
+    review_list = card_list[0].consolidation_reviews
 
     for review, expected_timedelta, expected_last_validated_timedelta in zip(review_list,
                                                                              expected_timedelta_list,
                                                                              expected_last_validated_timedelta_list):
-        assert review['timedelta'] == expected_timedelta
-        assert review['last_validated_timedelta'] == expected_last_validated_timedelta
+        assert review.timedelta == expected_timedelta
+        assert review.last_validated_timedelta == expected_last_validated_timedelta

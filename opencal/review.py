@@ -1,5 +1,5 @@
 from typing import List, Optional, Union, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 
 PY_DATE_FORMAT = r"%Y-%m-%d"
 
@@ -29,6 +29,8 @@ class ConsolidationReview:
         self.review_datetime: datetime = review_datetime    # TODO ?
         self.is_right_answer: bool = is_right_answer        # TODO ?
         self.user_response_time_ms: Optional[int] = user_response_time_ms
+        self.timedelta: Optional[timedelta] = None                 # TODO: IS THIS ATTRIBUTE REALLY USEFUL???
+        self.last_validated_timedelta: Optional[timedelta] = None  # TODO: IS THIS ATTRIBUTE REALLY USEFUL???
 
 
     def __getitem__(self, key: str) -> Union[str, datetime]:
@@ -59,6 +61,10 @@ class ConsolidationReview:
             return self.review_datetime  # TODO
         elif key == "result":
             return "good" if self.is_right_answer else "bad"
+        elif key == "timedelta":
+            return self.timedelta
+        elif key == "last_validated_timedelta":
+            return self.last_validated_timedelta
         else:
             raise KeyError(f"Key {key} not found in Review attributes")
 
@@ -105,6 +111,16 @@ class ConsolidationReview:
                 self.is_right_answer: bool = value == "good"
             else:
                 raise TypeError(f"Expected boolean or string, got {type(value)}")
+        elif key == "timedelta":
+            if isinstance(value, timedelta):
+                self.timedelta: timedelta = value
+            else:
+                raise TypeError(f"Expected datetime.timedelta, got {type(value)}")
+        elif key == "last_validated_timedelta":
+            if isinstance(value, timedelta):
+                self.last_validated_timedelta: timedelta = value
+            else:
+                raise TypeError(f"Expected datetime.timedelta, got {type(value)}")
         else:
             raise KeyError(f"Key {key} not found in Review attributes")
 

@@ -3,14 +3,20 @@ This teacher is only used for the in the ForwardTest tab.
 """
 
 import datetime
+from typing import Any, Optional, Union, List, Dict
 
+from opencal.card import Card
 from opencal.core.professor.professor import AbstractProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
-from typing import Optional
+from opencal.review import ConsolidationReview
 
 class ProfessorBrutus(AbstractProfessor):
 
-    def __init__(self, card_list, date_mock=None):
+    def __init__(
+            self,
+            card_list: List[Card],
+            date_mock: Optional[datetime.date] = None
+        ):
         super().__init__()
 
         self.update_card_list(card_list)
@@ -57,17 +63,11 @@ class ProfessorBrutus(AbstractProfessor):
             card = self._card_list.pop(0)
 
             if answer == RIGHT_ANSWER_STR:
-                review = {
-                    "rdate": self._date.today(),
-                    "result": RIGHT_ANSWER_STR
-                }
-                card["reviews"].append(review)
+                review = ConsolidationReview(review_datetime=self._date.today(), is_right_answer=True)  # TODO: use datetime instead date
+                card.consolidation_reviews.append(review)
             elif answer == WRONG_ANSWER_STR:
-                review = {
-                    "rdate": self._date.today(),
-                    "result": WRONG_ANSWER_STR
-                }
-                card["reviews"].append(review)
+                review = ConsolidationReview(review_datetime=self._date.today(), is_right_answer=False)  # TODO: use datetime instead date
+                card.consolidation_reviews.append(review)
             elif answer == "skip":
                 pass
             elif answer == "skip level":
@@ -76,17 +76,17 @@ class ProfessorBrutus(AbstractProfessor):
                 raise ValueError(f"Unknown answer : {answer}")
 
             if hide:
-                card["hidden"] = True
+                card.is_hidden = True
 
             self.notify_observers_of_reply()
 
 
     def update_card_list(
             self,
-            card_list: list,
+            card_list: List[Card],
             review_hidden_cards: bool = False
         ):
-        self._card_list = [card for card in card_list if ((not card["hidden"]) or review_hidden_cards)]
+        self._card_list = [card for card in card_list if ((not card.is_hidden) or review_hidden_cards)]
         #self.notify_observers()
 
 

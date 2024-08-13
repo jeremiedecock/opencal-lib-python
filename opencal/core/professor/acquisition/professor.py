@@ -1,13 +1,16 @@
 import datetime
+from typing import Optional, List, Dict
+
+from opencal.card import Card
 from opencal.core.professor.professor import AbstractProfessor
 from opencal.io.sqlitedb import ACQUISITION_REVIEW_TABLE_NAME, CARD_TABLE_NAME, PY_DATE_FORMAT
-from typing import Optional
+# from opencal.review import AcquisitionReview
 
 class AbstractAcquisitionProfessor(AbstractProfessor):
 
     def update_card_list(
             self,
-            card_list: list,
+            card_list: List[Card],
             review_hidden_cards: bool = False
         ):
         raise NotImplementedError()
@@ -15,7 +18,7 @@ class AbstractAcquisitionProfessor(AbstractProfessor):
 
     def save_current_card_reply(
         self,
-        card: dict,
+        card: Card,
         is_right_answer: bool,
         user_response_time_ms: Optional[int] = None
     ) -> None:
@@ -28,7 +31,7 @@ class AbstractAcquisitionProfessor(AbstractProfessor):
 
         Parameters
         ----------
-        card : dict
+        card : Card
             The card being reviewed.
         is_right_answer : bool
             A boolean indicating whether the answer was correct.
@@ -44,15 +47,11 @@ class AbstractAcquisitionProfessor(AbstractProfessor):
 
         # Retrieve the card ID ##################
 
-        is_hidden = card["hidden"]
-        assert is_hidden in (True, False)
-        is_hidden = int(is_hidden)
-
-        tag_list = card["tags"]
-        tags_str = "\n".join(tag_list)
+        is_hidden = int(card.is_hidden)
+        tags_str = "\n".join(card.tags)
 
         sql_query = f"SELECT id FROM {CARD_TABLE_NAME} WHERE creation_datetime=? AND question=? AND answer=? AND is_hidden=? AND tags=?"
-        self.cur.execute(sql_query, (card['cdate'].strftime(PY_DATE_FORMAT), card['question'], card['answer'], is_hidden, tags_str))
+        self.cur.execute(sql_query, (card.creation_datetime.strftime(PY_DATE_FORMAT), card.question, card.answer, is_hidden, tags_str))
         rows = self.cur.fetchall()
 
         if rows:

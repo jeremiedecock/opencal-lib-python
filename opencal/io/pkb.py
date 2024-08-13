@@ -83,9 +83,9 @@ def save_pkb(
                     rdate_str = review.review_datetime.strftime(PY_DATE_FORMAT)
                     result_str = "good" if review.is_right_answer else "bad"
                     fd.write(f'<review rdate="{rdate_str}" result="{result_str}"/>\n')
-                elif isinstance(review, dict): # TODO: Temporary workaround for backward compatibility
-                    rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
-                    fd.write(f'<review rdate="{rdate_str}" result="{review["result"]}"/>\n')
+                # elif isinstance(review, dict): # TODO: Temporary workaround for backward compatibility
+                #     rdate_str = review['rdate'].strftime(PY_DATE_FORMAT)
+                #     fd.write(f'<review rdate="{rdate_str}" result="{review["result"]}"/>\n')
                 else:
                     raise ValueError(f"Unexpected review type: {type(review)}")
 

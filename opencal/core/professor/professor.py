@@ -1,19 +1,20 @@
-import datetime
-import opencal
-from opencal.io.sqlitedb import ACQUISITION_REVIEW_TABLE_NAME
 import sqlite3
 from typing import Optional
 import warnings
+
+import opencal
+from opencal.io.sqlitedb import ACQUISITION_REVIEW_TABLE_NAME
 
 class AbstractProfessor:
 
     def __init__(self):
         self.observer_list = []
 
-        self.opencal_db_path = opencal.cfg['opencal']['db_path']
+        self.opencal_db_path: str = opencal.cfg['opencal']['db_path']
         self.opencal_db_path = opencal.path.expand_path(self.opencal_db_path)
-        self.con = sqlite3.connect(self.opencal_db_path)
-        self.cur = self.con.cursor()
+
+        self.con: sqlite3.Connection = sqlite3.connect(self.opencal_db_path)
+        self.cur: sqlite3.Cursor = self.con.cursor()
     
     def __del__(self):
         self.con.close()
@@ -71,5 +72,5 @@ class AbstractProfessor:
         raise NotImplementedError()
 
     @property
-    def remaining_cards(self):
+    def remaining_cards(self) -> float:
         return float("inf")      # Some professor may ask the same questions for an infinite (or unpredictable) number of times

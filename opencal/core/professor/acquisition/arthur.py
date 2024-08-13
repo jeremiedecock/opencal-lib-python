@@ -3,16 +3,24 @@ For each right answer, the card is removed.
 This teacher is used for the acquisition (or "learning phase"), i.e. the initial stage when information is introduced and learned.
 """
 
+from opencal.card import Card
 from opencal.core.professor.acquisition.professor import AbstractAcquisitionProfessor
 from opencal.core.data import RIGHT_ANSWER_STR, WRONG_ANSWER_STR
-from typing import Optional
+# from opencal.review import AcquisitionReview
+
+from typing import Any, Optional, Union, List, Dict
 
 DEFAULT_CARDS_IN_PROGRESS_INCREMENT_SIZE = 5
 DEFAULT_RIGHT_ANSWERS_RATE_THRESHOLD = 0.5
 
 class ProfessorArthur(AbstractAcquisitionProfessor):
 
-    def __init__(self, card_list, cards_in_progress_increment_size=DEFAULT_CARDS_IN_PROGRESS_INCREMENT_SIZE, right_answers_rate_threshold=DEFAULT_RIGHT_ANSWERS_RATE_THRESHOLD):
+    def __init__(
+            self,
+            card_list: List[Card],
+            cards_in_progress_increment_size: int = DEFAULT_CARDS_IN_PROGRESS_INCREMENT_SIZE,
+            right_answers_rate_threshold: float = DEFAULT_RIGHT_ANSWERS_RATE_THRESHOLD
+        ):
         super().__init__()
 
         self._cards_not_yet_reviewed_list = []
@@ -102,12 +110,12 @@ class ProfessorArthur(AbstractAcquisitionProfessor):
 
     def update_card_list(
             self,
-            card_list: list,
+            card_list: List[Card],
             review_hidden_cards: bool = False
         ):
-        self._cards_not_yet_reviewed_list = [(card_index, card) for (card_index, card) in enumerate(card_list) if ((not card["hidden"]) or review_hidden_cards)]
+        self._cards_not_yet_reviewed_list = [(card_index, card) for (card_index, card) in enumerate(card_list) if ((not card.is_hidden) or review_hidden_cards)]
         self._cards_in_progress_list = []
-        self._num_right_answers = [0 for card in card_list if ((not card["hidden"]) or review_hidden_cards)]          # the total number of right answers for each card
-        self._num_wrong_answers = [0 for card in card_list if ((not card["hidden"]) or review_hidden_cards)]          # the total number of wrong answers for each card
+        self._num_right_answers = [0 for card in card_list if ((not card.is_hidden) or review_hidden_cards)]          # the total number of right answers for each card
+        self._num_wrong_answers = [0 for card in card_list if ((not card.is_hidden) or review_hidden_cards)]          # the total number of wrong answers for each card
         self._last_card_in_progress_index = 0
         print(f"Review {len(card_list)} cards")

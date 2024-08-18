@@ -5,6 +5,7 @@
 This module contains unit tests for the "opencal.core.professor.consolidation.berenice" module.
 """
 
+from opencal.card import Card
 from opencal.core.professor.consolidation import berenice
 
 from opencal.core.mocks import DateMock

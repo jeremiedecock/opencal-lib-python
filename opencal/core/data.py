@@ -1,10 +1,14 @@
 import pandas as pd
 import copy
+from opencal.card import Card
+from typing import List, Tuple
 
 RIGHT_ANSWER_STR = "good"
 WRONG_ANSWER_STR = "bad"
 
-def card_list_to_dataframes(card_list):
+def card_list_to_dataframes(
+        card_list: List[Card]
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     flat_card_list = []
     flat_review_list = []
 
@@ -17,15 +21,14 @@ def card_list_to_dataframes(card_list):
         del card["answer"]
         del card["tags"]
 
-        if "reviews" in card.keys():
-            review_list = card["reviews"]
+        review_list = card.consolidation_reviews
 
-            for review in review_list:
-                review["card_id"] = card_id
+        for review in review_list:
+            review["card_id"] = card_id
 
-            flat_review_list.extend(review_list)
+        flat_review_list.extend(review_list)
 
-            del card["reviews"]
+        del card["reviews"]
 
         flat_card_list.append(card)
 

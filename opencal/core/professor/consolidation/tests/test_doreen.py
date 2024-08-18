@@ -5,6 +5,7 @@
 This module contains unit tests for the "opencal.core.professor.consolidation.doreen" module.
 """
 
+from opencal.card import Card
 from opencal.core.professor.consolidation import doreen
 
 from opencal.core.mocks import DateMock
